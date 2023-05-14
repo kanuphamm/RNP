@@ -1,0 +1,34 @@
+GENE: 23.200.0.101/23
+GENE-L2.10: 23.200.0.110/23
+GENE-L2.20: 23.200.0.120/23
+
+ZURI: 23.200.0.201/23
+ZURI-L2.10: 23.200.0.210/23
+ZURI-L2.20: 23.200.0.220/23
+
+CERN: 23.200.0.1
+23-student_1: 23.200.0.11
+23-staff_1: 23.200.0.12
+
+ETHZ: 23.200.0.2
+student2: 23.200.0.21
+staff2: 23.200.0.22
+
+EPFL: 23.200.0.3
+student2: 23.200.0.31
+staff2: 23.200.0.32
+
+remove interface: zuri, gene
+remove tag: student1,staff1, std3,stf3, std2,stf2
+remove gateways: ETHZ, std3, stf3, stf1, std1,  std2, stf2, CERN, EPFL
+remove ip address: EPFL, CERN, ETHZ, std1, sdt2, std3, stf1, stf2, stf3
+
+add IP:
+add gateway:
+add tag:
+add Interface:
+
+
+
+ip route del default via
+ip address del 23.200.3.1/32 dev 23-student_3
