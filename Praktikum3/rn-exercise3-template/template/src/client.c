@@ -19,9 +19,9 @@ int main(int argc, char** argv) {
   struct sockaddr_in sa;
   unsigned int sa_len = sizeof(struct sockaddr_in);
   ssize_t n = 0;
-  char* msg = "Hello World!";
+  char* msg = "Hello all";
 
-  sa.sin_family = AF_INET;
+  sa.sin_family = AF_INET; //AF_INET = Adressfamilie, die für die Kommunikation über IP verwendet wird. Es handelt sich um die Standardadressfamilie für IPv4-Adressen.
   sa.sin_port = htons(SRV_PORT);
 
   if (inet_pton(sa.sin_family, SRV_ADDRESS, &sa.sin_addr.s_addr) <= 0) {

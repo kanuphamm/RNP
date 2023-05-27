@@ -25,11 +25,13 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  //Socket wird an Adresse und Port des Servers gebunden
   if (bind(s_tcp, (struct sockaddr*)&sa, sa_len) < 0) {
     perror("bind");
     return 1;
   }
 
+  //fängt an zu hören
   if (listen(s_tcp, 5) < 0) {
     perror("listen");
     close(s_tcp);
