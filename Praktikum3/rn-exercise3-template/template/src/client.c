@@ -1,79 +1,65 @@
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>
+#include <sys/types.h>
 #include <unistd.h>
 
-#define BUFFER_SIZE 1024
-#define EOT 4
+#include <stdlib.h>
 
-void error(const char *message) {
-    perror(message);
-    exit(1);
-}
+// TODO: Remove this block.
+#define SRV_ADDRESS "127.0.0.1"
+#define SRV_PORT 7777
+#define MAX_BUFFER_SIZE 1024
 
-void send_command(int sockfd, const char *command) {
-    if (send(sockfd, command, strlen(command), 0) == -1)
-        error("Error sending command to server");
-}
+int main(int argc, char** argv) {
+  const char *server_ipaddress = argv[1];  // TODO: Remove cast and parse arguments.
+  int server_port = atoi(argv[2]);  // TODO: Remove cast and parse arguments.
+  int s_tcp;
+  struct sockaddr_in sa;
+  unsigned int sa_len = sizeof(struct sockaddr_in);
+  ssize_t n = 0;
+  char* msg = "Hello all";
 
-void receive_response(int sockfd) {
-    char buffer[BUFFER_SIZE];
-    ssize_t n;
+  sa.sin_family = AF_INET; //AF_INET = Adressfamilie, die für die Kommunikation über IP verwendet wird. Es handelt sich um die Standardadressfamilie für IPv4-Adressen.
+  sa.sin_port = htons(SRV_PORT); //(host to network short)converts our byte order to network standard
 
-    while ((n = recv(sockfd, buffer, BUFFER_SIZE - 1, 0)) > 0) {
-        buffer[n] = '\0';
-        printf("%s", buffer);
+  //converts ip address in string to binary "1.2.3.4" -> [1,2,3,4]
+  if (inet_pton(sa.sin_family, SRV_ADDRESS, &sa.sin_addr.s_addr) <= 0) {
+    perror("Address Conversion");
+    return 1;
+  }
 
-        if (buffer[n - 1] == EOT)
+  if ((s_tcp = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+    perror("Erro rwhile creating TCP Socket");
+    return 1;
+  }
+
+  if (connect(s_tcp, (struct sockaddr*)&sa, sa_len) < 0) {
+    perror("Connect");
+    return 1;
+  }
+
+  printf("Connected to the server.\n");
+  printf("Enter commands ('Quit' to exit):\n");
+    
+  char command[MAX_BUFFER_SIZE];
+
+  while (1) {
+    fgets(command, MAX_BUFFER_SIZE, stdin);
+        
+    // Remove trailing newline character
+    command[strcspn(command, "\n")] = '\0';
+
+    if ((n = send(s_tcp, command, strlen(msg), 0)) > 0) {
+      printf("Message %s sent (%zi Bytes).\n", command, n);
+    }
+
+    if (strcmp(command, "Quit") == 0) {
             break;
     }
-
-    if (n == -1)
-        error("Error receiving response from server");
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <server_address> <port>\n", argv[0]);
-        exit(1);
-    }
-
-    const char *server_address = argv[1];
-    int port = atoi(argv[2]);
-
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1)
-        error("Error creating socket");
-
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-
-    if (inet_pton(AF_INET, server_address, &server_addr.sin_addr) <= 0)
-        error("Invalid server address");
-
-    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
-        error("Error connecting to the server");
-
-    char command[BUFFER_SIZE];
-
-    while (1) {
-        printf("Enter a command (List/Files/Get/Put/Quit): ");
-        fgets(command, BUFFER_SIZE, stdin);
-
-        // Remove trailing newline character
-        command[strcspn(command, "\n")] = '\0';
-
-        send_command(sockfd, command);
-        receive_response(sockfd);
-
-        if (strcmp(command, "Quit") == 0)
-            break;
-    }
-
-    close(sockfd);
-
-    return 0;
+    printf("\nEnter commands ('Quit' to exit):\n");
+  }
+  close(s_tcp);
 }
