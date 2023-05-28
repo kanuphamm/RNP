@@ -1,57 +1,32 @@
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
-#include <sys/types.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 
-// TODO: Remove me.
-#define SRV_PORT 7777
+#define BUFFER_SIZE 1024
+#define EOT 4
 
-int main(int argc, char** argv) {
-  (void)argc;  // TODO: Remove cast and parse arguments.
-  (void)argv;  // TODO: Remove cast and parse arguments.
-  int s_tcp, news;
-  struct sockaddr_in sa, sa_client;
-  unsigned int sa_len = sizeof(struct sockaddr_in);
-  char info[256];
-
-  sa.sin_family = AF_INET;
-  sa.sin_port = htons(SRV_PORT);
-  sa.sin_addr.s_addr = INADDR_ANY;
-
-  if ((s_tcp = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-    perror("Error in TCP Socket");
-    return 1;
-  }
-
-  //Socket wird an Adresse und Port des Servers gebunden
-  if (bind(s_tcp, (struct sockaddr*)&sa, sa_len) < 0) {
-    perror("bind error");
-    return 1;
-  }
-
-  //fängt an zu hören
-  if (listen(s_tcp, 5) < 0) {
-    perror("listen error");
-    close(s_tcp);
-    return 1;
-  }
-  // TODO: Check port in use and print it.
-  printf("Waiting for TCP connections ... \n");
-
-  while (1) {
-    if ((news = accept(s_tcp, (struct sockaddr*)&sa_client, &sa_len)) < 0) {
-      perror("accept");
-      close(s_tcp);
-      return 1;
-    }
-
-
-    if (recv(news, info, sizeof(info), 0)) {
-      printf("Message received: %s \n", info);
-    }
-  }
-
-  close(s_tcp);
+void error(const char *message) {
+    perror(message);
+    exit(1);
 }
+
+void send_response(int sockfd, const char *response) {
+    if (send(sockfd, response, strlen(response), 0) == -1)
+        error("Error sending response to client");
+
+    // Send EOT character to mark end of transmission
+    if (send(sockfd, &EOT, 1, 0) == -1)
+        error("Error sending EOT character to client");
+}
+
+void handle_list_command(int sockfd) {
+    const char *response = "Client1:12345\nClient2:23456\n2 Clients connected\n";
+    send_response(sockfd, response);
+}
+
+void handle_files_command(int sockfd) {
+    const char *response = "file1.txt last modified: 2023-05-27, size: 1024\nfile2.txt last modified: 2023-05-26, size: 2048\n2 Files\n";
+    send_response
