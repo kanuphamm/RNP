@@ -21,19 +21,19 @@ int main(int argc, char** argv) {
   sa.sin_addr.s_addr = INADDR_ANY;
 
   if ((s_tcp = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-    perror("TCP Socket");
+    perror("Error in TCP Socket");
     return 1;
   }
 
   //Socket wird an Adresse und Port des Servers gebunden
   if (bind(s_tcp, (struct sockaddr*)&sa, sa_len) < 0) {
-    perror("bind");
+    perror("bind error");
     return 1;
   }
 
   //fängt an zu hören
   if (listen(s_tcp, 5) < 0) {
-    perror("listen");
+    perror("listen error");
     close(s_tcp);
     return 1;
   }
@@ -46,6 +46,8 @@ int main(int argc, char** argv) {
       close(s_tcp);
       return 1;
     }
+
+
     if (recv(news, info, sizeof(info), 0)) {
       printf("Message received: %s \n", info);
     }

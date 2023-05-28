@@ -11,6 +11,7 @@
 // TODO: Remove this block.
 #define SRV_ADDRESS "127.0.0.1"
 #define SRV_PORT 7777
+#define BUFFER 4096
 
 int main(int argc, char** argv) {
   (void)argc;  // TODO: Remove cast and parse arguments.
@@ -22,15 +23,16 @@ int main(int argc, char** argv) {
   char* msg = "Hello all";
 
   sa.sin_family = AF_INET; //AF_INET = Adressfamilie, die für die Kommunikation über IP verwendet wird. Es handelt sich um die Standardadressfamilie für IPv4-Adressen.
-  sa.sin_port = htons(SRV_PORT);
+  sa.sin_port = htons(SRV_PORT); //(host to network short)converts our byte order to network standard
 
+  //converts ip address in string to binary "1.2.3.4" -> [1,2,3,4]
   if (inet_pton(sa.sin_family, SRV_ADDRESS, &sa.sin_addr.s_addr) <= 0) {
     perror("Address Conversion");
     return 1;
   }
 
   if ((s_tcp = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-    perror("TCP Socket");
+    perror("Erro rwhile creating TCP Socket");
     return 1;
   }
 
