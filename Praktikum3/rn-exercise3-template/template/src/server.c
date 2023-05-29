@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/select.h>
+#include <string.h>
 
 // TODO: Remove me.
 #define SRV_PORT 7777
@@ -15,7 +16,7 @@ int main(int argc, char** argv) {
   int s_tcp, news;
   struct sockaddr_in sa, sa_client;
   unsigned int sa_len = sizeof(struct sockaddr_in);
-  char info[256];
+  char info[1024];
 
   sa.sin_family = AF_INET;
   sa.sin_port = htons(SRV_PORT);
@@ -27,8 +28,8 @@ int main(int argc, char** argv) {
   }
   //initialize fd set
   fd_set current_sockets, ready_sockets;
-  FD_ZERO(&current_sockets);
-  FD_SET(s_tcp, &current_sockets);
+  FD_ZERO(&current_sockets); // clears out the fd_set, so thatit doesn't contain any file descriptors. 
+  FD_SET(s_tcp, &current_sockets); //
 
   //Socket wird an Adresse und Port des Servers gebunden
   if (bind(s_tcp, (struct sockaddr*)&sa, sa_len) < 0) {
@@ -66,15 +67,25 @@ int main(int argc, char** argv) {
           FD_SET(news, &current_sockets);
         }else{
           news = i;
-        if (recv(news, info, sizeof(info), 0) > 0) {
-          printf("Message received: %s\n", info);
-          //TODO handle commands
+          // Clear the buffer before receiving a new message
+          memset(info, 0, sizeof(info));
+          if (recv(news, info, sizeof(info)-1, 0) > 0) {
+            //TODO handle commands
+            printf("Message received: %s\n", info);
+            if(strcmp(info, "List") == 0) {
+              printf("List\n");
+            } else if (strcmp(info, "Files") == 0){
+              printf("Files\n");
+            } else if (strcmp(info, "Get") == 0){
+              printf("Get\n");           
+            } else if (strcmp(info, "Put") == 0){
+              printf("Put\n");             
+            }
         } else {
           // Error or connection closed by the client
           if (recv == 0) {
             printf("Client disconnected.\n");
           } else {
-            printf("Client disconnected.\n");
             perror("recv");
           }
           close(news);

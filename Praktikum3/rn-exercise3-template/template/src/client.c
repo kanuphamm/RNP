@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     // Remove trailing newline character
     command[strcspn(command, "\n")] = '\0';
 
-    if ((n = send(s_tcp, command, strlen(msg), 0)) > 0) {
+    if ((n = send(s_tcp, command, strlen(command), 0)) > 0) {
       printf("Message %s sent (%zi Bytes).\n", command, n);
     }
 
