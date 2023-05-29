@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include <string.h>
+#include <netdb.h>
 
 // TODO: Remove me.
 #define SRV_PORT 7777
@@ -15,6 +16,7 @@ int main(int argc, char** argv) {
   (void)argv;  // TODO: Remove cast and parse arguments.
   int s_tcp, news;
   struct sockaddr_in sa, sa_client;
+  struct addrinfo test;
   unsigned int sa_len = sizeof(struct sockaddr_in);
   char info[1024];
 
@@ -28,8 +30,8 @@ int main(int argc, char** argv) {
   }
   //initialize fd set
   fd_set current_sockets, ready_sockets;
-  FD_ZERO(&current_sockets); // clears out the fd_set, so thatit doesn't contain any file descriptors. 
-  FD_SET(s_tcp, &current_sockets); //
+  FD_ZERO(&current_sockets); // clears out the fd_set, so that it doesn't contain any file descriptors. 
+  FD_SET(s_tcp, &current_sockets); //Füge den TCP-Socket s_tcp dem aktuellen Set der zu überwachenden Sockets hinzu
 
   //Socket wird an Adresse und Port des Servers gebunden
   if (bind(s_tcp, (struct sockaddr*)&sa, sa_len) < 0) {
