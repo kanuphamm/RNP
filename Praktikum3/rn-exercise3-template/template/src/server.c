@@ -16,7 +16,6 @@ int main(int argc, char** argv) {
   (void)argv;  // TODO: Remove cast and parse arguments.
   int s_tcp, news;
   struct sockaddr_in sa, sa_client;
-  struct addrinfo test;
   unsigned int sa_len = sizeof(struct sockaddr_in);
   char info[1024];
 
