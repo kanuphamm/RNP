@@ -1,65 +1,108 @@
-#include <arpa/inet.h>
-#include <netinet/in.h>
+/*
+** client.c -- a stream socket client demo
+*/
+
 #include <stdio.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-
 #include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
-// TODO: Remove this block.
+#include <arpa/inet.h>
+
+#define PORT "7777" // the port client will be connecting to 
 #define SRV_ADDRESS "127.0.0.1"
-#define SRV_PORT 7777
-#define MAX_BUFFER_SIZE 1024
+#define MAXDATASIZE 1024 // max number of bytes we can get at once 
 
-int main(int argc, char** argv) {
-  const char *server_ipaddress = argv[1];  // TODO: Remove cast and parse arguments.
-  int server_port = atoi(argv[2]);  // TODO: Remove cast and parse arguments.
-  int s_tcp;
-  struct sockaddr_in sa;
-  unsigned int sa_len = sizeof(struct sockaddr_in);
-  ssize_t n = 0;
-  char* msg = "Hello all";
+// get sockaddr, IPv4 or IPv6:
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
 
-  sa.sin_family = AF_INET; //AF_INET = Adressfamilie, die für die Kommunikation über IP verwendet wird. Es handelt sich um die Standardadressfamilie für IPv4-Adressen.
-  sa.sin_port = htons(SRV_PORT); //(host to network short)converts our byte order to network standard
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
 
-  //converts ip address in string to binary "1.2.3.4" -> [1,2,3,4]
-  if (inet_pton(sa.sin_family, SRV_ADDRESS, &sa.sin_addr.s_addr) <= 0) {
-    perror("Address Conversion");
-    return 1;
-  }
+int main(int argc, char *argv[])
+{
+    int sockfd, numbytes;  
+    char command[MAXDATASIZE];
+    struct addrinfo hints, *servinfo, *p;
+    int rv;
+    char s[INET6_ADDRSTRLEN];
 
-  if ((s_tcp = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-    perror("Erro rwhile creating TCP Socket");
-    return 1;
-  }
+    /*if (argc != 2) {
+        fprintf(stderr,"usage: client hostname\n");
+        exit(1);
+    }*/
 
-  if (connect(s_tcp, (struct sockaddr*)&sa, sa_len) < 0) {
-    perror("Connect");
-    return 1;
-  }
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
 
-  printf("Connected to the server.\n");
-  printf("Enter commands ('Quit' to exit):\n");
-    
-  char command[MAX_BUFFER_SIZE];
+    if ((rv = getaddrinfo(SRV_ADDRESS, PORT, &hints, &servinfo)) != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        return 1;
+    }
 
-  while (1) {
-    fgets(command, MAX_BUFFER_SIZE, stdin);
-        
+    // loop through all the results and connect to the first we can
+    for(p = servinfo; p != NULL; p = p->ai_next) {
+        if ((sockfd = socket(p->ai_family, p->ai_socktype,
+                p->ai_protocol)) == -1) {
+            perror("client: socket");
+            continue;
+        }
+
+        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+            close(sockfd);
+            perror("client: connect");
+            continue;
+        }
+
+        break;
+    }
+
+    if (p == NULL) {
+        fprintf(stderr, "client: failed to connect\n");
+        return 2;
+    }
+
+    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
+            s, sizeof s);
+    printf("client: connecting to %s\n", s);
+
+    freeaddrinfo(servinfo); // all done with this structure
+
+    printf("Connected to the server.\n");
+    printf("Enter commands ('Quit' to exit):\n");
+
+    while (1) {
+    fgets(command, MAXDATASIZE, stdin);
+
     // Remove trailing newline character
     command[strcspn(command, "\n")] = '\0';
 
-    if ((n = send(s_tcp, command, strlen(command), 0)) > 0) {
-      printf("Message %s sent (%zi Bytes).\n", command, n);
+    if (strcmp(command, "Quit") == 0) {
+      break;
     }
 
-    if (strcmp(command, "Quit") == 0) {
-            break;
+    ssize_t n = send(sockfd, command, strlen(command), 0);
+    if (n > 0) {
+      printf("Message '%s' sent (%zi Bytes).\n", command, n);
+    } else {
+      perror("send");
+      break;
     }
+
     printf("\nEnter commands ('Quit' to exit):\n");
   }
-  close(s_tcp);
+
+    close(sockfd);
+
+    return 0;
 }
