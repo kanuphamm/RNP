@@ -55,24 +55,26 @@ int main(int argc, char** argv) {
   char buffer[MAX_BUFFER_SIZE];
   char buffer_stream[MAX_BUFFER_SIZE];
   while (1) {
+    printf("\nEnter commands ('Quit' to exit):\n");
     fgets(buffer, MAX_BUFFER_SIZE, stdin);
 
-    
 
-
-    #define MAX_TOKENS 2
-    #define MAX_TOKEN_LENGTH 50
-    char tokens[MAX_TOKENS][MAX_TOKEN_LENGTH];
-    int numTokens = 0;
-    char* token;
     char delimiter[] = " ";
 
-    while ((token = strtok(buffer, delimiter))) {
-        //idee token jedesmal mit malloc speicher zuweisen
+    char* token;
+    char** tokens = malloc(sizeof(char*) * 10);  // Speicher für maximal 10 Tokens reservieren
+    int numTokens = 0;
+
+    token = strtok(buffer, delimiter);
+    while (token != NULL) {
+        tokens[numTokens] = malloc(strlen(token) /*+ 1*/);  // Speicher für das Token reservieren
         strcpy(tokens[numTokens], token);
+        tokens[numTokens][strcspn(tokens[numTokens], "\n")] = '\0';
+        printf("<%s>", tokens[numTokens]);
+
+        token = strtok(NULL, delimiter);
         numTokens++;
     }
-
 
     if (strcmp(tokens[0], "List") == 0) {
         
@@ -84,6 +86,7 @@ int main(int argc, char** argv) {
 
     }
     else if(strcmp(tokens[0], "Put") == 0){
+      printf("inside Put");
       // Datei öffnen
       file = fopen(tokens[1], "r");  //TODO Fehler test1.txt" durch ptr ersetzt
       if (file == NULL) {
@@ -103,10 +106,15 @@ int main(int argc, char** argv) {
     else if(strcmp(tokens[0], "Quit") == 0){
       break;
     }
-        
+    
+
+    // Speicher für Tokens freigeben
+    for (int i = 0; i < numTokens; i++) {
+        free(tokens[i]);
+    }
+    free(tokens);
     // Remove trailing newline character
     buffer[strcspn(buffer, "\n")] = '\0';
-    printf("\nEnter commands ('Quit' to exit):\n");
   }
   
   close(s_tcp);
