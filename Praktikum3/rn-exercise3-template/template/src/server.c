@@ -74,13 +74,13 @@ int main(int argc, char** argv) {
             //TODO handle commands
             printf("Message received: %s\n", info);
             if(strcmp(info, "List") == 0) {
-              printf("List\n");
+              printf("!!!List!!!\n");
             } else if (strcmp(info, "Files") == 0){
-              printf("Files\n");
+              printf("!!!Files!!!\n");
             } else if (strcmp(info, "Get") == 0){
-              printf("Get\n");           
+              printf("!!!Get!!!\n");           
             } else if (strcmp(info, "Put") == 0){
-              printf("Put\n");             
+              printf("!!!Put!!!\n");             
             }
         } else {
           // Error or connection closed by the client

@@ -77,10 +77,18 @@ int main(int argc, char** argv) {
     }
 
     if (strcmp(tokens[0], "List") == 0) {
-        
+      bytesSent = send(s_tcp, tokens[0], strlen(tokens[0]), 0);
+      if (bytesSent < 0) {
+          perror("Fehler beim Senden");
+          exit(1);
+      }
     }
     else if(strcmp(tokens[0], "Files") == 0){
-
+      bytesSent = send(s_tcp, tokens[0], strlen(tokens[0]), 0);
+      if (bytesSent < 0) {
+          perror("Fehler beim Senden");
+          exit(1);
+      }
     }
     else if(strcmp(tokens[0], "Get") == 0){
 
@@ -88,9 +96,31 @@ int main(int argc, char** argv) {
     else if(strcmp(tokens[0], "Put") == 0){
       printf("inside Put");
       // Datei öffnen
-      file = fopen(tokens[1], "r");  //TODO Fehler test1.txt" durch ptr ersetzt
+      file = fopen(tokens[1], "r");
       if (file == NULL) {
           perror("Fehler beim Öffnen der Datei ");
+          exit(1);
+      }
+
+      // Calculate the length of the concatenated string
+      char space[] = " ";
+      size_t length = strlen(tokens[0]) + strlen(space) +strlen(tokens[1]) + 1;
+    
+      // Allocate memory for the concatenated string
+      char* concatenated = (char*)malloc(length * sizeof(char));
+      if (concatenated == NULL) {
+        printf("Memory allocation failed.\n");
+        return 1;
+      }
+
+      strcpy(concatenated, tokens[0]);
+      strcat(concatenated, space);
+      strcat(concatenated, tokens[1]);
+
+      //Send Command Put <dateiname>
+      bytesSent = send(s_tcp, concatenated, strlen(concatenated), 0);
+      if (bytesSent < 0) {
+          perror("Fehler beim Senden");
           exit(1);
       }
 
@@ -115,7 +145,8 @@ int main(int argc, char** argv) {
     free(tokens);
     // Remove trailing newline character
     buffer[strcspn(buffer, "\n")] = '\0';
-  }
+
+  }//end While
   
   close(s_tcp);
 }
