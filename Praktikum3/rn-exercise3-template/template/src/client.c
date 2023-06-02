@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-
+#include <limits.h>
 #include <arpa/inet.h>
 
 #define PORT "7777" // the port client will be connecting to 
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     int rv;
     char s[INET6_ADDRSTRLEN];
     FILE* file;
-
+    char buffer[100];
     /*if (argc != 2) {
         fprintf(stderr,"usage: client hostname\n");
         exit(1);
@@ -85,24 +85,52 @@ int main(int argc, char *argv[])
     command[strcspn(command, "\n")] = '\0';
 
     // Returns a pointer to the first occurrence of str2 in str1, or a null pointer if str2 is not part of str1.
-    if(strstr(command, "Put ") == 0) {
+    if (strncmp(command, "Put", 3) == 0) {
         char *substring = strstr(command, "Put ");
         if (substring != NULL) {
-            //substring poinst to beginning of "Put "
+            //substring points to beginning of "Put "
             char *filename = substring + 4; // Pointer to place after "Put "
-            printf("Dateiname: %s\n", filename);
+            printf("Dateiname: (%s)\n", filename);
 
             file = fopen(filename, "r");
             if (file == NULL) {
-                perror("Fehler beim Öffnen der Datei ");
-                exit(1);
+  //              perror("Fehler beim Öffnen der Datei ");
+                printf("Fehler");
+ //               exit(1);
             }
+
+            while (fgets(buffer, sizeof(buffer), file) != NULL) {
+                printf("%s", buffer);
+            }
+
+            fclose(file);
+        }
+    }else if (strcmp(command, "Quit") == 0) {
+        break;
+    }else if(strcmp(command, "Pfad") == 0){
+        char path[PATH_MAX];
+
+        // Den aktuellen Arbeitsverzeichnis-Pfad abrufen
+        if (getcwd(path, sizeof(path)) != NULL) {
+            printf("Aktuelles Arbeitsverzeichnis: %s\n", path);
+        } else {
+            perror("Fehler beim Abrufen des Arbeitsverzeichnisses");
+            return EXIT_FAILURE;
         }
 
+        // Den absoluten Pfad eines bestimmten Verzeichnisses oder einer Datei abrufen
+        char *absolutePath = realpath("../../src", NULL);
+        if (absolutePath != NULL) {
+            printf("Absoluter Pfad: %s\n", absolutePath);
+            free(absolutePath);
+        } else {
+            perror("Fehler beim Abrufen des absoluten Pfads");
+            return EXIT_FAILURE;
+        }
+
+        return EXIT_SUCCESS;
     }
-    if (strcmp(command, "Quit") == 0) {
-      break;
-    }
+
 
     ssize_t n = send(sockfd, command, strlen(command), 0);
     if (n > 0) {

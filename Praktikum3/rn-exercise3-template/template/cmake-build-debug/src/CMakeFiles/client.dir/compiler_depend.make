@@ -104,8 +104,27 @@ src/CMakeFiles/client.dir/client.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exe
   /usr/include/x86_64-linux-gnu/bits/in.h \
   /usr/include/rpc/netdb.h \
   /usr/include/x86_64-linux-gnu/bits/netdb.h \
+  /usr/lib/gcc/x86_64-linux-gnu/11/include/limits.h \
+  /usr/lib/gcc/x86_64-linux-gnu/11/include/syslimits.h \
+  /usr/include/limits.h \
+  /usr/include/x86_64-linux-gnu/bits/posix1_lim.h \
+  /usr/include/x86_64-linux-gnu/bits/local_lim.h \
+  /usr/include/linux/limits.h \
+  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
+  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min.h \
+  /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
   /usr/include/arpa/inet.h
 
+
+/usr/include/x86_64-linux-gnu/bits/posix2_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/x86_64-linux-gnu/bits/local_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
 
 /usr/include/x86_64-linux-gnu/bits/in.h:
 
@@ -179,6 +198,8 @@ src/CMakeFiles/client.dir/client.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exe
 
 /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
 
+/usr/lib/gcc/x86_64-linux-gnu/11/include/limits.h:
+
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
 
 /usr/include/asm-generic/bitsperlong.h:
@@ -247,6 +268,8 @@ src/CMakeFiles/client.dir/client.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exe
 
 /usr/include/x86_64-linux-gnu/bits/errno.h:
 
+/usr/lib/gcc/x86_64-linux-gnu/11/include/syslimits.h:
+
 /usr/include/x86_64-linux-gnu/bits/getopt_core.h:
 
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
@@ -277,9 +300,13 @@ src/CMakeFiles/client.dir/client.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exe
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
+/usr/include/limits.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/confname.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthread_stack_min.h:
 
 /usr/include/alloca.h:
 
