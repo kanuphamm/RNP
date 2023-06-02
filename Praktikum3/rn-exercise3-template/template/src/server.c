@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/select.h>
-
+#define MAX_CLIENTS 20 // maximum number of clients
 #define PORT "7777"   // port we're listening on
 
 // get sockaddr, IPv4 or IPv6:
@@ -45,6 +45,9 @@ int main(void)
     int i, j, rv;
 
     struct addrinfo hints, *ai, *p;
+
+    int client_sockets[MAX_CLIENTS]; // array to store client sockets
+    int num_clients = 0; // number of connected clients
 
     FD_ZERO(&master);    // clear the master and temp sets
     FD_ZERO(&read_fds);
@@ -93,6 +96,7 @@ int main(void)
     // add the listener to the master set
     FD_SET(listener, &master);
 
+
     // keep track of the biggest file descriptor
     fdmax = listener; // so far, it's this one
     printf("Waiting for TCP connections ... \n");
@@ -117,6 +121,10 @@ int main(void)
                     if (newfd == -1) {
                         perror("accept");
                     } else {
+                        //add client to list
+                        client_sockets[num_clients] = newfd;
+                        num_clients++;
+
                         FD_SET(newfd, &master); // add to master set
                         if (newfd > fdmax) {    // keep track of the max
                             fdmax = newfd;
@@ -135,13 +143,21 @@ int main(void)
                         // got error or connection closed by client
                         printf("Message received: %s\n", buf);
                         if (strcmp(buf, "List") == 0) {
-                        printf("List\n");
+                            for (j = 0; j < num_clients; j++) {
+                                //printf("Socket %d\n", client_sockets[j]);
+                                char clientHost[NI_MAXHOST];
+                                char clientPort[NI_MAXSERV];
+                                getnameinfo((struct sockaddr *) &remoteaddr, addrlen, clientHost, NI_MAXHOST,
+                                            clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+                                printf("%s:%s\n", clientHost, clientPort);
+                            }
+                            printf("%d Clients connected\n", num_clients);
                         } else if (strcmp(buf, "Files") == 0) {
-                        printf("Files\n");
+                            printf("Files\n");
                         } else if (strcmp(buf, "Get") == 0) {
-                        printf("Get\n");
+                            printf("Get\n");
                         } else if (strcmp(buf, "Put") == 0) {
-                        printf("Put\n");
+                            printf("Put\n");
                         }
                     } else {
                         if (recv == 0) {
