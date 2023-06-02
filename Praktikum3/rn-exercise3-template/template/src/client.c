@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
+    FILE* file;
 
     /*if (argc != 2) {
         fprintf(stderr,"usage: client hostname\n");
@@ -80,9 +81,25 @@ int main(int argc, char *argv[])
     while (1) {
     fgets(command, MAXDATASIZE, stdin);
 
-    // Remove trailing newline character
+    // Remove newline character
     command[strcspn(command, "\n")] = '\0';
 
+    // Returns a pointer to the first occurrence of str2 in str1, or a null pointer if str2 is not part of str1.
+    if(strstr(command, "Put ") == 0) {
+        char *substring = strstr(command, "Put ");
+        if (substring != NULL) {
+            //substring poinst to beginning of "Put "
+            char *filename = substring + 4; // Pointer to place after "Put "
+            printf("Dateiname: %s\n", filename);
+
+            file = fopen(filename, "r");
+            if (file == NULL) {
+                perror("Fehler beim Öffnen der Datei ");
+                exit(1);
+            }
+        }
+
+    }
     if (strcmp(command, "Quit") == 0) {
       break;
     }
