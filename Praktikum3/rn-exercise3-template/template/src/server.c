@@ -1,7 +1,3 @@
-/*
-** selectserver.c -- a cheezy multiperson chat server
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +8,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/select.h>
+#include <time.h>
+
+
 #define MAX_CLIENTS 20 // maximum number of clients
 #define PORT "7777"   // port we're listening on
 
@@ -142,16 +141,19 @@ int main(void)
                     if ((nbytes = recv(i, buf, sizeof buf, 0)) > 0) {
                         // got error or connection closed by client
                         printf("Message received: %s\n", buf);
-// -----------------Command List
                         if (strcmp(buf, "List") == 0) {
+// -----------------Command: List
                             for (j = 0; j < num_clients; j++) {
                                 //printf("Socket %d\n", client_sockets[j]);
                                 struct sockaddr_storage clientAddr;
                                 socklen_t addrLen = sizeof(clientAddr);
+                                //get info of network connection
                                 getpeername(client_sockets[j], (struct sockaddr*)&clientAddr, &addrLen);
 
                                 char clientHost[NI_MAXHOST];
                                 char clientPort[NI_MAXSERV];
+
+                                //get ip
                                 getnameinfo((struct sockaddr*)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
                                 printf("%s:%s\n", clientHost, clientPort);
@@ -162,7 +164,21 @@ int main(void)
                         } else if (strcmp(buf, "Get") == 0) {
                             printf("Get\n");
                         } else if (strcmp(buf, "Put") == 0) {
-                            printf("Put\n");
+// -----------------Command: Put
+                            time_t currentTime;
+                            struct tm *timeInfo;
+                            char timeString[20];
+                            time(&currentTime);
+                            timeInfo = localtime(&currentTime);
+                            strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", timeInfo);
+
+                            char serverHost[NI_MAXHOST];
+                            char serverIP[NI_MAXHOST];
+                            getnameinfo((struct sockaddr*)&remoteaddr, addrlen, serverHost, NI_MAXHOST, serverIP, NI_MAXHOST, NI_NUMERICHOST);
+
+                            printf("OK %s\n", serverHost);
+                            printf("%s\n", serverIP);
+                            printf("%s\n", timeString);
                         }
                     } else {
                         if (recv == 0) {
