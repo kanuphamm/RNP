@@ -24,6 +24,45 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+void handleListCommand(int *client_sockets, int num_clients)
+{
+    int j;
+    for (j = 0; j < num_clients; j++)
+    {
+        struct sockaddr_storage clientAddr;
+        socklen_t addrLen = sizeof(clientAddr);
+        //get info of network connection
+        getpeername(client_sockets[j], (struct sockaddr *)&clientAddr, &addrLen);
+
+        char clientHost[NI_MAXHOST];
+        char clientPort[NI_MAXSERV];
+
+        //get ip
+        getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+
+        printf("%s:%s\n", clientHost, clientPort);
+    }
+    printf("%d Clients connected\n", num_clients);
+}
+
+void handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen)
+{
+    time_t currentTime;
+    struct tm *timeInfo;
+    char timeString[20];
+    time(&currentTime);
+    timeInfo = localtime(&currentTime);
+    strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", timeInfo);
+
+    char serverHost[NI_MAXHOST];
+    char serverIP[NI_MAXHOST];
+    getnameinfo((struct sockaddr *)&remoteaddr, addrlen, serverHost, NI_MAXHOST, serverIP, NI_MAXHOST, NI_NUMERICHOST);
+
+    printf("OK %s\n", serverHost);
+    printf("%s\n", serverIP);
+    printf("%s\n", timeString);
+}
+
 int main(void)
 {
     fd_set master;    // master file descriptor list
@@ -143,55 +182,23 @@ int main(void)
                         printf("Message received: %s\n", buf);
                         if (strcmp(buf, "List") == 0) {
 // -----------------Command: List
-                            for (j = 0; j < num_clients; j++) {
-                                //printf("Socket %d\n", client_sockets[j]);
-                                struct sockaddr_storage clientAddr;
-                                socklen_t addrLen = sizeof(clientAddr);
-                                //get info of network connection
-                                getpeername(client_sockets[j], (struct sockaddr*)&clientAddr, &addrLen);
-
-                                char clientHost[NI_MAXHOST];
-                                char clientPort[NI_MAXSERV];
-
-                                //get ip
-                                getnameinfo((struct sockaddr*)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
-
-                                printf("%s:%s\n", clientHost, clientPort);
-                            }
-                            printf("%d Clients connected\n", num_clients);
+                            handleListCommand(client_sockets, num_clients);
                         } else if (strcmp(buf, "Files") == 0) {
                             printf("Files\n");
                         } else if (strcmp(buf, "Get") == 0) {
                             printf("Get\n");
                         } else if (strcmp(buf, "Put") == 0) {
 // -----------------Command: Put
-                            time_t currentTime;
-                            struct tm *timeInfo;
-                            char timeString[20];
-                            time(&currentTime);
-                            timeInfo = localtime(&currentTime);
-                            strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", timeInfo);
-
-                            char serverHost[NI_MAXHOST];
-                            char serverIP[NI_MAXHOST];
-                            getnameinfo((struct sockaddr*)&remoteaddr, addrlen, serverHost, NI_MAXHOST, serverIP, NI_MAXHOST, NI_NUMERICHOST);
-
-                            printf("OK %s\n", serverHost);
-                            printf("%s\n", serverIP);
-                            printf("%s\n", timeString);
+                            handlePutCommand(remoteaddr, addrlen);
                         }
                     } else {
-                        if (recv == 0) {
-                        printf("Client disconnected.\n");
-                        } else {
-                        perror("recv");
-                        }
                         if (nbytes == 0) {
                             // connection closed
-                            printf("selectserver: socket %d hung up\n", i);
+                            printf("Client disconnected on socket %d.\n", i);
                         } else {
                             perror("recv");
                         }
+                        num_clients--;
                         close(i); // bye!
                         FD_CLR(i, &master); // remove from master set
                     } 

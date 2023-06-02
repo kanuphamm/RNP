@@ -98,8 +98,14 @@ src/CMakeFiles/server.dir/server.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exe
   /usr/include/arpa/inet.h \
   /usr/include/netdb.h \
   /usr/include/rpc/netdb.h \
-  /usr/include/x86_64-linux-gnu/bits/netdb.h
+  /usr/include/x86_64-linux-gnu/bits/netdb.h \
+  /usr/include/time.h \
+  /usr/include/x86_64-linux-gnu/bits/time.h \
+  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
+  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h
 
+
+/usr/include/time.h:
 
 /usr/include/x86_64-linux-gnu/bits/in.h:
 
@@ -231,6 +237,8 @@ src/CMakeFiles/server.dir/server.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exe
 
 /usr/include/x86_64-linux-gnu/bits/getopt_core.h:
 
+/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
+
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdio2.h:
@@ -263,6 +271,8 @@ src/CMakeFiles/server.dir/server.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exe
 
 /usr/include/x86_64-linux-gnu/bits/confname.h:
 
+/usr/include/x86_64-linux-gnu/bits/time.h:
+
 /usr/include/alloca.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
@@ -280,6 +290,8 @@ src/CMakeFiles/server.dir/server.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exe
 /usr/include/x86_64-linux-gnu/bits/socket.h:
 
 /usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
 
 /usr/include/rpc/netdb.h:
 
