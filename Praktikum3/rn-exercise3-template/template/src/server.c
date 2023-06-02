@@ -11,7 +11,7 @@
 #include <time.h>
 
 
-#define MAX_CLIENTS 20 // maximum number of clients
+#define MAX_CLIENTS 25 // maximum number of clients
 #define PORT "7777"   // port we're listening on
 
 // get sockaddr, IPv4 or IPv6:
