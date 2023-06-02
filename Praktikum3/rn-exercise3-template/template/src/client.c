@@ -123,6 +123,7 @@ int main(int argc, char** argv) {
           perror("Fehler beim Senden");
           exit(1);
       }
+      free(concatenated);
 
       // Datei zeilenweise lesen und an den Server senden
       while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
