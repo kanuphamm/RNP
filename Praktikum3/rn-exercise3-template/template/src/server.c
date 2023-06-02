@@ -137,18 +137,23 @@ int main(void)
                             newfd);
                     }
                 } else {
-                    // handle data from a client
+// -----------------handle data from a client
                     memset(buf, 0, sizeof(buf));
                     if ((nbytes = recv(i, buf, sizeof buf, 0)) > 0) {
                         // got error or connection closed by client
                         printf("Message received: %s\n", buf);
+// -----------------Command List
                         if (strcmp(buf, "List") == 0) {
                             for (j = 0; j < num_clients; j++) {
                                 //printf("Socket %d\n", client_sockets[j]);
+                                struct sockaddr_storage clientAddr;
+                                socklen_t addrLen = sizeof(clientAddr);
+                                getpeername(client_sockets[j], (struct sockaddr*)&clientAddr, &addrLen);
+
                                 char clientHost[NI_MAXHOST];
                                 char clientPort[NI_MAXSERV];
-                                getnameinfo((struct sockaddr *) &remoteaddr, addrlen, clientHost, NI_MAXHOST,
-                                            clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+                                getnameinfo((struct sockaddr*)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+
                                 printf("%s:%s\n", clientHost, clientPort);
                             }
                             printf("%d Clients connected\n", num_clients);
