@@ -91,6 +91,7 @@ int main(void)
     FD_ZERO(&read_fds);
 
     // get us a socket and bind it
+    //binde netzwerk addresse an socket
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;

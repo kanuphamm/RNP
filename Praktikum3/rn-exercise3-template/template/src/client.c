@@ -80,6 +80,76 @@ char* get_file_path(const char* absolutePath, const char* filename) {
     return filePath;
 }
 
+int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_stream)
+{
+    FILE* file;
+    ssize_t bytesSent = 0;
+
+    // Datei öffnen                    
+    char* absolutePath = getAbsolutePath("../../src/storageClient");
+    printf("\nabsolutePath: %s\n",absolutePath);
+    //substring points to beginning of "Put "
+    char* filePath = get_file_path(absolutePath, filename);
+    printf("filePath: %s\n",filePath);
+
+    file = fopen(filePath, "r");
+    if (file == NULL) {
+        perror("Fehler beim Öffnen der Datei ");
+        free(absolutePath);
+        free(filePath);
+        fclose(file);
+        return -1;
+    }else{
+        // Calculate the length of the concatenated string
+        char space[] = " ";
+        size_t length = strlen(command) + strlen(space) +strlen(filename) + 1; //TODO frage +1
+
+        // Allocate memory for the concatenated string
+        char* concatenated = (char*)malloc(length * sizeof(char));
+        if (concatenated == NULL) {
+            printf("Memory allocation failed.\n");
+                free(absolutePath);
+                free(filePath);
+                fclose(file);
+            return -1;
+        }
+
+        strcpy(concatenated, command);
+        strcat(concatenated, space);
+        strcat(concatenated, filename);
+
+        //Send Command Put <dateiname>
+        bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
+        if (bytesSent < 0) {
+            perror("Fehler beim Senden");
+                free(absolutePath);
+                free(filePath);
+                fclose(file);
+            return -1;
+        }
+        free(concatenated);
+
+        // Datei zeilenweise lesen und an den Server senden
+        while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
+            bytesSent = send(sockfd, buffer_stream, strlen(buffer_stream), 0);
+            if (bytesSent < 0) {
+                perror("Fehler beim Senden der Daten");
+                free(absolutePath);
+                free(filePath);
+                fclose(file);
+                return -1;
+            }
+        }
+        free(absolutePath);
+        free(filePath);
+        fclose(file);
+        
+    }
+    return 1;
+}
+
+
+
 int main(int argc, char *argv[])
 {
     printf("argc: %d",argc);
@@ -88,8 +158,8 @@ int main(int argc, char *argv[])
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
-    FILE* file;
     ssize_t bytesSent = 0;
+    
     /*if (argc != 2) {
         fprintf(stderr,"usage: client hostname\n");
         exit(1);
@@ -147,9 +217,8 @@ int main(int argc, char *argv[])
 
 
         char delimiter[] = " ";
-
         char* token;
-        char** tokens = malloc(sizeof(char*) * 10);  // Speicher für maximal 10 Tokens reservieren
+        char** tokens = malloc(sizeof(char*) * 2);  // Speicher für maximal 10 Tokens reservieren
         int numTokens = 0;
 
         token = strtok(buffer, delimiter);
@@ -181,55 +250,7 @@ int main(int argc, char *argv[])
 
         }
         else if(strcmp(tokens[0], "Put") == 0){
-            // Datei öffnen  
-                    
-            char* absolutePath = getAbsolutePath("../../src/storageClient");
-            printf("\nabsolutePath: %s\n",absolutePath);
-            //substring points to beginning of "Put "
-            char *filename = tokens[1]; // Pointer to place after "Put "
-            char* filePath = get_file_path(absolutePath, filename);
-            printf("filePath: %s\n",filePath);
-
-            file = fopen(filePath, "r");
-            if (file == NULL) {
-                perror("Fehler beim Öffnen der Datei ");
-                //exit(1);
-            }else{
-                // Calculate the length of the concatenated string
-                char space[] = " ";
-                size_t length = strlen(tokens[0]) + strlen(space) +strlen(tokens[1]) + 1; //TODO frage +1
-
-                // Allocate memory for the concatenated string
-                char* concatenated = (char*)malloc(length * sizeof(char));
-                if (concatenated == NULL) {
-                    printf("Memory allocation failed.\n");
-                    return 1;
-                }
-
-                strcpy(concatenated, tokens[0]);
-                strcat(concatenated, space);
-                strcat(concatenated, tokens[1]);
-
-                //Send Command Put <dateiname>
-                bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
-                if (bytesSent < 0) {
-                    perror("Fehler beim Senden");
-                    exit(1);
-                }
-                free(concatenated);
-
-                // Datei zeilenweise lesen und an den Server senden
-                while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
-                    bytesSent = send(sockfd, buffer_stream, strlen(buffer_stream), 0);
-                    if (bytesSent < 0) {
-                        perror("Fehler beim Senden der Daten");
-                        exit(1);
-                    }
-                }
-                free(absolutePath);
-                free(filePath);
-                fclose(file);
-            }
+            handlePutCommand( tokens[1], tokens[0], sockfd, buffer_stream);
         }
         else if(strcmp(tokens[0], "Quit") == 0){
             ClientIsRunning = 0;
