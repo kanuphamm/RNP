@@ -21,11 +21,6 @@
 		{
 			"isCMake" : true,
 			"isExternal" : true,
-			"path" : "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/CMakeUnixFindMake.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
 			"path" : "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/CMakeSystemSpecificInitialize.cmake"
 		},
 		{
@@ -305,21 +300,6 @@
 		{
 			"isCMake" : true,
 			"isExternal" : true,
-			"path" : "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/CMakeFindCodeBlocks.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/CMakeExtraGeneratorDetermineCompilerMacrosAndIncludeDirs.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/ProcessorCount.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
 			"path" : "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/CMakeCInformation.cmake"
 		},
 		{
@@ -423,8 +403,8 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug",
-		"source" : "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template"
+		"build" : "/home/kanu/Documents/RNP2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug",
+		"source" : "/home/kanu/Documents/RNP2/RNP/Praktikum3/rn-exercise3-template/template"
 	},
 	"version" : 
 	{

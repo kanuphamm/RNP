@@ -175,8 +175,10 @@ int main(void)
                             newfd);
                     }
                 } else {
+                    printf("Handle data");
 // -----------------handle data from a client
                     memset(buf, 0, sizeof(buf));
+                    printf("Bin hier");
                     if ((nbytes = recv(i, buf, sizeof buf, 0)) > 0) {
                         // got error or connection closed by client
                         printf("Message received: %s\n", buf);
@@ -195,6 +197,7 @@ int main(void)
                     } else {
                         if (nbytes == 0) {
                             // connection closed
+                            printf("nbytes %d\n", nbytes);
                             printf("Client disconnected on socket %d.\n", i);
                         } else {
                             perror("recv");

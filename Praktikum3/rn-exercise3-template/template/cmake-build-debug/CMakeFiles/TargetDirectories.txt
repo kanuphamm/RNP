@@ -1,6 +1,6 @@
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/client.dir
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/server.dir
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/edit_cache.dir
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/rebuild_cache.dir
+/home/kanu/Documents/RNP2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/kanu/Documents/RNP2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/kanu/Documents/RNP2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/client.dir
+/home/kanu/Documents/RNP2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/server.dir
+/home/kanu/Documents/RNP2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/edit_cache.dir
+/home/kanu/Documents/RNP2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/rebuild_cache.dir
