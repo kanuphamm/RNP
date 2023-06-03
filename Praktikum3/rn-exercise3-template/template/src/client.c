@@ -25,8 +25,8 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-char* getAbsolutePath() {
-    const char* relativePath = "../../src";
+char* getAbsolutePath( char * filepath) { //"../../src/storageClient"
+    const char* relativePath = filepath;
     char* path = (char*)malloc(PATH_MAX * sizeof(char));
 
 // Get the current working directory
@@ -66,7 +66,6 @@ char* get_file_path(const char* absolutePath, const char* filename) {
         fprintf(stderr, "Error calculating buffer size.\n");
         return NULL;
     }
-
     // Allocate memory for the concatenated string
     char* filePath = malloc(bufferSize + 1);
     if (filePath == NULL) {
@@ -142,7 +141,9 @@ int main(int argc, char *argv[])
     int ClientIsRunning = 1;
     while (ClientIsRunning) {
         printf("\nEnter commands ('Quit' to exit):\n");
-        fgets(buffer, MAX_BUFFER_SIZE, stdin);
+        if(fgets(buffer, MAX_BUFFER_SIZE, stdin) == NULL ){
+            perror("fehler fgets stdin");
+        }
 
 
         char delimiter[] = " ";
@@ -180,50 +181,59 @@ int main(int argc, char *argv[])
 
         }
         else if(strcmp(tokens[0], "Put") == 0){
-            printf("inside Put");
-            // Datei öffnen
-            file = fopen(tokens[1], "r");
+            // Datei öffnen  
+                    
+            char* absolutePath = getAbsolutePath("../../src/storageClient");
+            printf("\nabsolutePath: %s\n",absolutePath);
+            //substring points to beginning of "Put "
+            char *filename = tokens[1]; // Pointer to place after "Put "
+            char* filePath = get_file_path(absolutePath, filename);
+            printf("filePath: %s\n",filePath);
+
+            file = fopen(filePath, "r");
             if (file == NULL) {
                 perror("Fehler beim Öffnen der Datei ");
-                exit(1);
-            }
+                //exit(1);
+            }else{
+                // Calculate the length of the concatenated string
+                char space[] = " ";
+                size_t length = strlen(tokens[0]) + strlen(space) +strlen(tokens[1]) + 1; //TODO frage +1
 
-            // Calculate the length of the concatenated string
-            char space[] = " ";
-            size_t length = strlen(tokens[0]) + strlen(space) +strlen(tokens[1]) + 1; //TODO frage +1
+                // Allocate memory for the concatenated string
+                char* concatenated = (char*)malloc(length * sizeof(char));
+                if (concatenated == NULL) {
+                    printf("Memory allocation failed.\n");
+                    return 1;
+                }
 
-            // Allocate memory for the concatenated string
-            char* concatenated = (char*)malloc(length * sizeof(char));
-            if (concatenated == NULL) {
-                printf("Memory allocation failed.\n");
-                return 1;
-            }
+                strcpy(concatenated, tokens[0]);
+                strcat(concatenated, space);
+                strcat(concatenated, tokens[1]);
 
-            strcpy(concatenated, tokens[0]);
-            strcat(concatenated, space);
-            strcat(concatenated, tokens[1]);
-
-            //Send Command Put <dateiname>
-            bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
-            if (bytesSent < 0) {
-                perror("Fehler beim Senden");
-                exit(1);
-            }
-            free(concatenated);
-
-            // Datei zeilenweise lesen und an den Server senden
-            while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
-                bytesSent = send(sockfd, buffer_stream, strlen(buffer_stream), 0);
+                //Send Command Put <dateiname>
+                bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
                 if (bytesSent < 0) {
-                    perror("Fehler beim Senden der Daten");
+                    perror("Fehler beim Senden");
                     exit(1);
                 }
+                free(concatenated);
+
+                // Datei zeilenweise lesen und an den Server senden
+                while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
+                    bytesSent = send(sockfd, buffer_stream, strlen(buffer_stream), 0);
+                    if (bytesSent < 0) {
+                        perror("Fehler beim Senden der Daten");
+                        exit(1);
+                    }
+                }
+                free(absolutePath);
+                free(filePath);
+                fclose(file);
             }
         }
         else if(strcmp(tokens[0], "Quit") == 0){
             ClientIsRunning = 0;
         }
-
 
         // Speicher für Tokens freigeben
         for (int i = 0; i < numTokens; i++) {
