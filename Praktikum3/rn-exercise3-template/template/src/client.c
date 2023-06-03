@@ -24,6 +24,62 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+char* getAbsolutePath() {
+    const char* relativePath = "../../src";
+    char* path = (char*)malloc(PATH_MAX * sizeof(char));
+
+// Get the current working directory
+    if (getcwd(path, PATH_MAX) != NULL) {
+        // Get the absolute path of the specified directory
+        char* absolutePath = realpath(relativePath, NULL);
+        if (absolutePath != NULL) {
+            // Append a trailing slash if necessary
+            size_t len = strlen(absolutePath);
+            if (len > 0 && absolutePath[len - 1] != '/') {
+                char* newPath = (char*)malloc((len + 2) * sizeof(char));
+                strcpy(newPath, absolutePath);
+                strcat(newPath, "/");
+                free(absolutePath);
+                absolutePath = newPath;
+            }
+
+            free(path);
+            return absolutePath;
+        } else {
+            perror("Error getting the absolute path");
+            free(path);
+            return NULL;
+        }
+    } else {
+        perror("Error getting the current working directory");
+        free(path);
+        return NULL;
+    }
+}
+
+char* get_file_path(const char* absolutePath, const char* filename) {
+    // Calculate the required buffer size for the concatenated string
+    int bufferSize = snprintf(NULL, 0, "%s%s", absolutePath, filename);
+    if (bufferSize < 0) {
+        // Error handling if snprintf fails
+        fprintf(stderr, "Error calculating buffer size.\n");
+        return NULL;
+    }
+
+    // Allocate memory for the concatenated string
+    char* filePath = malloc(bufferSize + 1);
+    if (filePath == NULL) {
+        // Error handling if memory allocation fails
+        fprintf(stderr, "Error allocating memory.\n");
+        return NULL;
+    }
+
+    // Concatenate the absolute path and filename
+    snprintf(filePath, bufferSize + 1, "%s%s", absolutePath, filename);
+    printf("filepath: %s\n", filePath);
+    return filePath;
+}
+
 int main(int argc, char *argv[])
 {
     int sockfd, numbytes;  
@@ -60,7 +116,6 @@ int main(int argc, char *argv[])
             perror("client: connect");
             continue;
         }
-
         break;
     }
 
@@ -83,16 +138,23 @@ int main(int argc, char *argv[])
 
     // Remove newline character
     command[strcspn(command, "\n")] = '\0';
+    ssize_t n = send(sockfd, command, strlen(command), 0);
 
-    // Returns a pointer to the first occurrence of str2 in str1, or a null pointer if str2 is not part of str1.
+// -----------------Command: Put
     if (strncmp(command, "Put", 3) == 0) {
+        // Returns a pointer to the first occurrence of str2 in str1, or a null pointer if str2 is not part of str1.
         char *substring = strstr(command, "Put ");
         if (substring != NULL) {
+            //get path
+            char* absolutePath = getAbsolutePath();
+
             //substring points to beginning of "Put "
             char *filename = substring + 4; // Pointer to place after "Put "
-            printf("Dateiname: (%s)\n", filename);
+            char* filePath = get_file_path(absolutePath, filename);
 
-            file = fopen(filename, "r");
+            printf("Dateipfad: (%s)\n", filePath);
+
+            file = fopen(filePath, "r");
             if (file == NULL) {
   //              perror("Fehler beim Öffnen der Datei ");
                 printf("Fehler");
@@ -100,39 +162,19 @@ int main(int argc, char *argv[])
             }
 
             while (fgets(buffer, sizeof(buffer), file) != NULL) {
+                ssize_t n = send(sockfd, buffer, strlen(buffer), 0);
                 printf("%s", buffer);
             }
 
+            printf("\nDone getting content \n");
+            free(absolutePath);
             fclose(file);
         }
     }else if (strcmp(command, "Quit") == 0) {
         break;
-    }else if(strcmp(command, "Pfad") == 0){
-        char path[PATH_MAX];
-
-        // Den aktuellen Arbeitsverzeichnis-Pfad abrufen
-        if (getcwd(path, sizeof(path)) != NULL) {
-            printf("Aktuelles Arbeitsverzeichnis: %s\n", path);
-        } else {
-            perror("Fehler beim Abrufen des Arbeitsverzeichnisses");
-            return EXIT_FAILURE;
-        }
-
-        // Den absoluten Pfad eines bestimmten Verzeichnisses oder einer Datei abrufen
-        char *absolutePath = realpath("../../src", NULL);
-        if (absolutePath != NULL) {
-            printf("Absoluter Pfad: %s\n", absolutePath);
-            free(absolutePath);
-        } else {
-            perror("Fehler beim Abrufen des absoluten Pfads");
-            return EXIT_FAILURE;
-        }
-
-        return EXIT_SUCCESS;
     }
 
 
-    ssize_t n = send(sockfd, command, strlen(command), 0);
     if (n > 0) {
       printf("Message '%s' sent (%zi Bytes).\n", command, n);
     } else {

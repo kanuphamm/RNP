@@ -187,8 +187,9 @@ int main(void)
                             printf("Files\n");
                         } else if (strcmp(buf, "Get") == 0) {
                             printf("Get\n");
-                        } else if (strcmp(buf, "Put") == 0) {
+                        } else if (strncmp(buf, "Put", 3) == 0) {
 // -----------------Command: Put
+                            //if(datei gespeichert)
                             handlePutCommand(remoteaddr, addrlen);
                         }
                     } else {
