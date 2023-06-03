@@ -80,7 +80,7 @@ int main(void)
     char remoteIP[INET6_ADDRSTRLEN];
 
     int yes=1;        // for setsockopt() SO_REUSEADDR, below
-    int i, j, rv;
+    int i, rv;
 
     struct addrinfo hints, *ai, *p;
 
@@ -175,11 +175,9 @@ int main(void)
                             newfd);
                     }
                 } else {
-                    printf("Handle data");
 // -----------------handle data from a client
                     memset(buf, 0, sizeof(buf));
-                    printf("Bin hier");
-                    if ((nbytes = recv(i, buf, sizeof buf, 0)) > 0) {
+                    if ((nbytes = recv(i, buf, sizeof(buf) -1, 0)) > 0) { //TODO fragen -1
                         // got error or connection closed by client
                         printf("Message received: %s\n", buf);
                         if (strcmp(buf, "List") == 0) {

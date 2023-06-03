@@ -83,13 +83,13 @@ char* get_file_path(const char* absolutePath, const char* filename) {
 
 int main(int argc, char *argv[])
 {
-    int sockfd, numbytes;  
-    char command[MAXDATASIZE];
+    printf("argc: %d",argc);
+    printf("argv[0]: %s",argv[0]);
+    int sockfd;  
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
     FILE* file;
-    char buffer2[100];
     ssize_t bytesSent = 0;
     /*if (argc != 2) {
         fprintf(stderr,"usage: client hostname\n");
@@ -139,7 +139,8 @@ int main(int argc, char *argv[])
     char buffer_stream[MAX_BUFFER_SIZE];
 
 //WHILE--------------------------------------------
-    while (1) {
+    int ClientIsRunning = 1;
+    while (ClientIsRunning) {
         printf("\nEnter commands ('Quit' to exit):\n");
         fgets(buffer, MAX_BUFFER_SIZE, stdin);
 
@@ -152,7 +153,7 @@ int main(int argc, char *argv[])
 
         token = strtok(buffer, delimiter);
         while (token != NULL) {
-            tokens[numTokens] = malloc(strlen(token) /*+ 1*/);  // Speicher für das Token reservieren
+            tokens[numTokens] = malloc(strlen(token) + 1);  // Speicher für das Token reservieren
             strcpy(tokens[numTokens], token);
             tokens[numTokens][strcspn(tokens[numTokens], "\n")] = '\0';
             printf("<%s>", tokens[numTokens]);
@@ -189,7 +190,7 @@ int main(int argc, char *argv[])
 
             // Calculate the length of the concatenated string
             char space[] = " ";
-            size_t length = strlen(tokens[0]) + strlen(space) +strlen(tokens[1]) + 1;
+            size_t length = strlen(tokens[0]) + strlen(space) +strlen(tokens[1]) + 1; //TODO frage +1
 
             // Allocate memory for the concatenated string
             char* concatenated = (char*)malloc(length * sizeof(char));
@@ -220,7 +221,7 @@ int main(int argc, char *argv[])
             }
         }
         else if(strcmp(tokens[0], "Quit") == 0){
-            break;
+            ClientIsRunning = 0;
         }
 
 

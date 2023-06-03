@@ -1,4 +1,0 @@
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/CMakeFiles/client.dir
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/CMakeFiles/server.dir
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/CMakeFiles/edit_cache.dir
-/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/CMakeFiles/rebuild_cache.dir
