@@ -46,7 +46,12 @@ void handleListCommand(int *client_sockets, int num_clients)
 }
 
 void handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen)
-{
+{   
+
+
+
+
+
     time_t currentTime;
     struct tm *timeInfo;
     char timeString[20];
@@ -190,7 +195,16 @@ int main(void)
                             printf("Get\n");
                         } else if (strncmp(buf, "Put", 3) == 0) {
 // -----------------Command: Put
-                            //if(datei gespeichert)
+                            FILE *file;
+                            file = fopen("output.txt", "w");
+                            if (file == NULL) {
+                            printf("Failed to open the file.\n");
+                                return 1;
+                            }
+                            fprintf(file, "%s", buf);
+                            fclose(file);
+
+
                             handlePutCommand(remoteaddr, addrlen);
                         }
                     } else {

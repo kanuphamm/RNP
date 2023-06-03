@@ -97,7 +97,6 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
         perror("Fehler beim Öffnen der Datei ");
         free(absolutePath);
         free(filePath);
-        fclose(file);
         return -1;
     }else{
         // Calculate the length of the concatenated string
@@ -128,6 +127,7 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
             return -1;
         }
         free(concatenated);
+        sleep(5);//TODO Wie ist das trennzeichen für den header
 
         // Datei zeilenweise lesen und an den Server senden
         while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
@@ -215,7 +215,6 @@ int main(int argc, char *argv[])
             perror("fehler fgets stdin");
         }
 
-
         char delimiter[] = " ";
         char* token;
         char** tokens = malloc(sizeof(char*) * 2);  // Speicher für maximal 10 Tokens reservieren
@@ -232,6 +231,7 @@ int main(int argc, char *argv[])
             numTokens++;
         }
 
+//Command Manager------------------------------------
         if (strcmp(tokens[0], "List") == 0) {
             bytesSent = send(sockfd, tokens[0], strlen(tokens[0]), 0);
             if (bytesSent < 0) {
