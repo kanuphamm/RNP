@@ -9,6 +9,8 @@
 #include <netdb.h>
 #include <sys/select.h>
 #include <time.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 
 #define MAX_CLIENTS 25 // maximum number of clients
@@ -67,6 +69,48 @@ void handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen)
     printf("%s\n", serverIP);
     printf("%s\n", timeString);
 }
+
+void handleFileCommand(const char* directory, int clientSocket) {
+    DIR* dir;
+    struct dirent* entry;
+    struct stat attrib;
+
+    // Verzeichnis öffnen
+    dir = opendir(directory);
+
+    if (dir) {
+        while ((entry = readdir(dir)) != NULL) {
+            // Den vollen Pfad zum Eintrag erstellen
+            char pfad[1024];
+            sprintf(pfad, "%s/%s", directory, entry->d_name);
+
+            // Dateiattribute abrufen
+            stat(pfad, &attrib);
+
+            // Nur reguläre Dateien berücksichtigen
+            if (S_ISREG(attrib.st_mode)) {
+                // Dateiname und Attribute in eine Zeichenkette formatieren
+                char buffer[1024];
+                sprintf(buffer, "%s\tLast Modified: %s\tSize: %lld bytes\n",
+                        entry->d_name,
+                        ctime(&attrib.st_mtime),
+                        (long long)attrib.st_size);
+
+                // Daten an den Clienten senden
+                send(clientSocket, buffer, strlen(buffer), 0);
+            }
+        }
+
+        // Verzeichnis schließen
+        closedir(dir);
+    } else {
+        printf("Fehler beim Öffnen des Verzeichnisses\n");
+        return;
+    }
+}
+
+
+
 
 int main(void)
 {
@@ -186,15 +230,17 @@ int main(void)
                     if ((nbytes = recv(i, buf, sizeof(buf) -1, 0)) > 0) { //TODO fragen -1
                         // got error or connection closed by client
                         printf("Message received: %s\n", buf);
+// -----------------Command: List                        
                         if (strcmp(buf, "List") == 0) {
-// -----------------Command: List
                             handleListCommand(client_sockets, num_clients);
+// -----------------Command: Files                            
                         } else if (strcmp(buf, "Files") == 0) {
-                            printf("Files\n");
+                            const char* verzeichnis = "../../src/storageServer/";
+                            handleFileCommand(verzeichnis, i); // i ist der clientSocket
                         } else if (strcmp(buf, "Get") == 0) {
                             printf("Get\n");
+// -----------------Command: Put                            
                         } else if (strncmp(buf, "Put", 3) == 0) {
-// -----------------Command: Put
                             FILE *file;
                             file = fopen("output.txt", "w");
                             if (file == NULL) {

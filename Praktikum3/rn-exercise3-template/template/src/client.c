@@ -148,6 +148,22 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
     return 1;
 }
 
+void handleFilesCommand(int sockfd)
+{
+    printf("handleFilesCommand");
+    ssize_t bytesRead;
+    char buffer[MAX_BUFFER_SIZE];
+
+    // Empfange und drucke die Serverantwort
+    while ((bytesRead = recv(sockfd, buffer, sizeof(buffer) - 1, 0)) > 0) {
+        buffer[bytesRead] = '\0';
+        printf("%s", buffer);
+    }
+
+    if (bytesRead == -1) {
+        perror("Fehler beim Empfangen der Daten");
+    }
+}
 
 
 int main(int argc, char *argv[])
@@ -245,6 +261,7 @@ int main(int argc, char *argv[])
                 perror("Fehler beim Senden");
                 exit(1);
             }
+            handleFilesCommand(sockfd);
         }
         else if(strcmp(tokens[0], "Get") == 0){
 
