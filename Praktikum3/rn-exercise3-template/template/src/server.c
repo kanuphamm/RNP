@@ -49,11 +49,6 @@ void handleListCommand(int *client_sockets, int num_clients)
 
 void handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen)
 {   
-
-
-
-
-
     time_t currentTime;
     struct tm *timeInfo;
     char timeString[20];
@@ -227,32 +222,74 @@ int main(void)
                 } else {
 // -----------------handle data from a client
                     memset(buf, 0, sizeof(buf));
-                    if ((nbytes = recv(i, buf, sizeof(buf) -1, 0)) > 0) { //TODO fragen -1
+                    if ((nbytes = recv(i, buf, sizeof(buf) -1, 0)) > 0) //TODO fragen -1
+                    { 
                         // got error or connection closed by client
                         printf("Message received: %s\n", buf);
+
+                        char delimiter[] = " ";
+                        char* token;
+                        const int  numTokens = 2;
+                        char** tokens = malloc(sizeof(char*) * numTokens);  // Speicher für maximal 2 Tokens reservieren
+                        int cntTokens = 0;
+
+                        token = strtok(buf, delimiter);
+                        while ( (token != NULL) || (numTokens > cntTokens) ) {
+                            tokens[cntTokens] = malloc(strlen(token) + 1);  // Speicher für das Token reservieren
+                            strcpy(tokens[cntTokens], token);
+                            tokens[cntTokens][strcspn(tokens[cntTokens], "\n")] = '\0';
+                            printf("GetToken:<%s>", tokens[cntTokens]);
+                            token = strtok(NULL, delimiter);
+                            cntTokens++;
+                        }
+
+
 // -----------------Command: List                        
-                        if (strcmp(buf, "List") == 0) {
+                        if (strcmp(tokens[0], "List") == 0) {
                             handleListCommand(client_sockets, num_clients);
 // -----------------Command: Files                            
-                        } else if (strcmp(buf, "Files") == 0) {
+                        } else if (strcmp(tokens[0], "Files") == 0) {
                             const char* verzeichnis = "../../src/storageServer/";
                             handleFileCommand(verzeichnis, i); // i ist der clientSocket
-                        } else if (strcmp(buf, "Get") == 0) {
+                        } else if (strcmp(tokens[0], "Get") == 0) {
                             printf("Get\n");
 // -----------------Command: Put                            
-                        } else if (strncmp(buf, "Put", 3) == 0) {
+                        } else if (strncmp(tokens[0], "Put", 3) == 0) {
                             FILE *file;
-                            file = fopen("output.txt", "w");
+                            const char* verzeichnis = "../../src/storageServer/";
+                            size_t length = strlen(verzeichnis) + strlen(tokens[1]) + 1; //TODO frage +1
+                            char* pathAndFileName = (char*)malloc(length * sizeof(char));
+                            if (pathAndFileName == NULL) {
+                                printf("Memory allocation failed.\n");
+                                return 1;
+                            }
+                            strcpy(pathAndFileName, verzeichnis);
+                            strcat(pathAndFileName, tokens[1]);
+                            printf("<%s>",pathAndFileName);
+                            fflush(stdout);
+                            file = fopen(pathAndFileName, "w");
                             if (file == NULL) {
                             printf("Failed to open the file.\n");
                                 return 1;
                             }
-                            fprintf(file, "%s", buf);
+
+                            
+                            while ((nbytes = recv(i, buf, sizeof(buf) -1, 0)) > 0) {
+                                fprintf(file, "%s", buf);
+                                fflush(file);
+                            }
                             fclose(file);
 
 
                             handlePutCommand(remoteaddr, addrlen);
                         }
+
+                        // Speicher für Tokens freigeben
+                        for (int i = 0; i < numTokens; i++) {
+                            free(tokens[i]);
+                        }
+                        free(tokens);
+
                     } else {
                         if (nbytes == 0) {
                             // connection closed

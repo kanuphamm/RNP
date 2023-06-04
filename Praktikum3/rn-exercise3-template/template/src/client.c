@@ -132,6 +132,7 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
         // Datei zeilenweise lesen und an den Server senden
         while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
             bytesSent = send(sockfd, buffer_stream, strlen(buffer_stream), 0);
+            printf("Send: %s",buffer_stream);
             if (bytesSent < 0) {
                 perror("Fehler beim Senden der Daten");
                 free(absolutePath);
@@ -150,7 +151,6 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
 
 void handleFilesCommand(int sockfd)
 {
-    printf("handleFilesCommand");
     ssize_t bytesRead;
     char buffer[MAX_BUFFER_SIZE];
 
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 
         char delimiter[] = " ";
         char* token;
-        char** tokens = malloc(sizeof(char*) * 2);  // Speicher für maximal 10 Tokens reservieren
+        char** tokens = malloc(sizeof(char*) * 2);  // Speicher für maximal 2 Tokens reservieren
         int numTokens = 0;
 
         token = strtok(buffer, delimiter);
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
             tokens[numTokens] = malloc(strlen(token) + 1);  // Speicher für das Token reservieren
             strcpy(tokens[numTokens], token);
             tokens[numTokens][strcspn(tokens[numTokens], "\n")] = '\0';
-            printf("<%s>", tokens[numTokens]);
+            printf("GetToken<%s>", tokens[numTokens]);
 
             token = strtok(NULL, delimiter);
             numTokens++;
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
         else if(strcmp(tokens[0], "Get") == 0){
 
         }
-        else if(strcmp(tokens[0], "Put") == 0){
+        else if(strcmp(tokens[0], "Put") == 0 && numTokens == 2) {
             handlePutCommand( tokens[1], tokens[0], sockfd, buffer_stream);
         }
         else if(strcmp(tokens[0], "Quit") == 0){
