@@ -1,5 +1,5 @@
 src/CMakeFiles/server.dir/server.c.o: \
- /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/server.c \
+ /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/src/server.c \
  /usr/include/stdc-predef.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \

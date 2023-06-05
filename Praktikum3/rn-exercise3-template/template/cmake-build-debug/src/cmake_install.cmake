@@ -1,4 +1,4 @@
-# Install script for directory: /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src
+# Install script for directory: /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

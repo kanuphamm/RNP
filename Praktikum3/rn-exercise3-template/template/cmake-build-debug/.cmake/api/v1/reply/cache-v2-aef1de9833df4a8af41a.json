@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug"
+			"value" : "/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -491,7 +491,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles/pkgRedirects"
+			"value" : "/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -551,7 +551,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template"
+			"value" : "/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1191,7 +1191,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug"
+			"value" : "/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug"
 		},
 		{
 			"name" : "rn-ex03_IS_TOP_LEVEL",
@@ -1215,7 +1215,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template"
+			"value" : "/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template"
 		}
 	],
 	"kind" : "cache",

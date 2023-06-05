@@ -7,10 +7,10 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/CMakeLists.txt"
+  "/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/CMakeLists.txt"
   "CMakeFiles/3.25.2/CMakeCCompiler.cmake"
   "CMakeFiles/3.25.2/CMakeSystem.cmake"
-  "/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/CMakeLists.txt"
+  "/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/src/CMakeLists.txt"
   "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/CMakeCCompiler.cmake.in"
   "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/CMakeCCompilerABI.c"
   "/snap/clion/237/bin/cmake/linux/x64/share/cmake-3.25/Modules/CMakeCInformation.cmake"

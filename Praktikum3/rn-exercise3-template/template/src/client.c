@@ -13,6 +13,8 @@
 #define PORT "7777" // the port client will be connecting to 
 #define SRV_ADDRESS "127.0.0.1"
 #define MAXDATASIZE 1024 // max number of bytes we can get at once 
+#define MAX_BUFFER_SIZE 1024
+void receiveCommand(int sockfd);
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -76,7 +78,6 @@ char* get_file_path(const char* absolutePath, const char* filename) {
 
     // Concatenate the absolute path and filename
     snprintf(filePath, bufferSize + 1, "%s%s", absolutePath, filename);
-    printf("filepath: %s\n", filePath);
     return filePath;
 }
 
@@ -152,7 +153,6 @@ int main(int argc, char *argv[])
             char *filename = substring + 4; // Pointer to place after "Put "
             char* filePath = get_file_path(absolutePath, filename);
 
-            printf("Dateipfad: (%s)\n", filePath);
 
             file = fopen(filePath, "r");
             if (file == NULL) {
@@ -160,13 +160,11 @@ int main(int argc, char *argv[])
                 printf("Fehler");
  //               exit(1);
             }
-
+            memset(buffer, 0, sizeof buffer);
             while (fgets(buffer, sizeof(buffer), file) != NULL) {
                 ssize_t n = send(sockfd, buffer, strlen(buffer), 0);
-                printf("%s", buffer);
             }
-
-            printf("\nDone getting content \n");
+            receiveCommand(sockfd);
             free(absolutePath);
             fclose(file);
         }
@@ -188,4 +186,20 @@ int main(int argc, char *argv[])
     close(sockfd);
 
     return 0;
+}
+
+void receiveCommand(int sockfd)
+{
+    ssize_t bytesRead;
+    char buffer[MAX_BUFFER_SIZE];
+    // Empfange und drucke die Serverantwort
+    if((bytesRead = recv(sockfd, buffer, sizeof(buffer) - 1, 0)) > 0) {
+        buffer[bytesRead] = '\0';
+        printf("%s", buffer);
+        printf("Bytes gelesen: %ld\n", bytesRead);
+    }
+
+    if (bytesRead == -1) {
+        perror("Fehler beim Empfangen der Daten");
+    }
 }

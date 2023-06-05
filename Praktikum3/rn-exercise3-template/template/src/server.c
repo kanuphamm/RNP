@@ -14,54 +14,9 @@
 #define MAX_CLIENTS 25 // maximum number of clients
 #define PORT "7777"   // port we're listening on
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-void handleListCommand(int *client_sockets, int num_clients)
-{
-    int j;
-    for (j = 0; j < num_clients; j++)
-    {
-        struct sockaddr_storage clientAddr;
-        socklen_t addrLen = sizeof(clientAddr);
-        //get info of network connection
-        getpeername(client_sockets[j], (struct sockaddr *)&clientAddr, &addrLen);
-
-        char clientHost[NI_MAXHOST];
-        char clientPort[NI_MAXSERV];
-
-        //get ip
-        getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
-
-        printf("%s:%s\n", clientHost, clientPort);
-    }
-    printf("%d Clients connected\n", num_clients);
-}
-
-void handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen)
-{
-    time_t currentTime;
-    struct tm *timeInfo;
-    char timeString[20];
-    time(&currentTime);
-    timeInfo = localtime(&currentTime);
-    strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", timeInfo);
-
-    char serverHost[NI_MAXHOST];
-    char serverIP[NI_MAXHOST];
-    getnameinfo((struct sockaddr *)&remoteaddr, addrlen, serverHost, NI_MAXHOST, serverIP, NI_MAXHOST, NI_NUMERICHOST);
-
-    printf("OK %s\n", serverHost);
-    printf("%s\n", serverIP);
-    printf("%s\n", timeString);
-}
+void handleListCommand(int *client_sockets, int num_clients);
+void handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, int sockfd);
+void *get_in_addr(struct sockaddr *sa);
 
 int main(void)
 {
@@ -80,7 +35,7 @@ int main(void)
     char remoteIP[INET6_ADDRSTRLEN];
 
     int yes=1;        // for setsockopt() SO_REUSEADDR, below
-    int i, j, rv;
+    int i, rv;
 
     struct addrinfo hints, *ai, *p;
 
@@ -190,7 +145,7 @@ int main(void)
                         } else if (strncmp(buf, "Put", 3) == 0) {
 // -----------------Command: Put
                             //if(datei gespeichert)
-                            handlePutCommand(remoteaddr, addrlen);
+                            handlePutCommand(remoteaddr, addrlen, i);
                         }
                     } else {
                         if (nbytes == 0) {
@@ -209,4 +164,54 @@ int main(void)
     } // END for(;;)--and you thought it would never end!
     
     return 0;
+}
+
+// get sockaddr, IPv4 or IPv6:
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+void handleListCommand(int *client_sockets, int num_clients)
+{
+    int j;
+    for (j = 0; j < num_clients; j++)
+    {
+        struct sockaddr_storage clientAddr;
+        socklen_t addrLen = sizeof(clientAddr);
+        //get info of network connection
+        getpeername(client_sockets[j], (struct sockaddr *)&clientAddr, &addrLen);
+
+        char clientHost[NI_MAXHOST];
+        char clientPort[NI_MAXSERV];
+
+        //get ip
+        getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+
+        printf("%s:%s\n", clientHost, clientPort);
+    }
+    printf("%d Clients connected\n", num_clients);
+}
+
+void handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, int sockfd)
+{
+    time_t currentTime;
+    struct tm *timeInfo;
+    char timeString[20];
+    time(&currentTime);
+    timeInfo = localtime(&currentTime);
+    strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", timeInfo);
+
+    char serverHost[NI_MAXHOST];
+    char serverIP[NI_MAXHOST];
+    getnameinfo((struct sockaddr *)&remoteaddr, addrlen, serverHost, NI_MAXHOST, serverIP, NI_MAXHOST, NI_NUMERICHOST);
+
+    char message[512];
+
+    snprintf(message, sizeof(message), "OK %s\n%s\n%s\n", serverHost, serverIP, timeString);
+    send(sockfd, message, sizeof(message), 0);
 }

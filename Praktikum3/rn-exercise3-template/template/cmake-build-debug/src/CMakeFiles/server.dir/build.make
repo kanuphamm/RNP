@@ -53,10 +53,10 @@ RM = /snap/clion/237/bin/cmake/linux/x64/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template
+CMAKE_SOURCE_DIR = /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug
+CMAKE_BINARY_DIR = /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug
 
 # Include any dependencies generated for this target.
 include src/CMakeFiles/server.dir/depend.make
@@ -70,18 +70,18 @@ include src/CMakeFiles/server.dir/progress.make
 include src/CMakeFiles/server.dir/flags.make
 
 src/CMakeFiles/server.dir/server.c.o: src/CMakeFiles/server.dir/flags.make
-src/CMakeFiles/server.dir/server.c.o: /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/server.c
+src/CMakeFiles/server.dir/server.c.o: /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/src/server.c
 src/CMakeFiles/server.dir/server.c.o: src/CMakeFiles/server.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object src/CMakeFiles/server.dir/server.c.o"
-	cd /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT src/CMakeFiles/server.dir/server.c.o -MF CMakeFiles/server.dir/server.c.o.d -o CMakeFiles/server.dir/server.c.o -c /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/server.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object src/CMakeFiles/server.dir/server.c.o"
+	cd /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT src/CMakeFiles/server.dir/server.c.o -MF CMakeFiles/server.dir/server.c.o.d -o CMakeFiles/server.dir/server.c.o -c /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/src/server.c
 
 src/CMakeFiles/server.dir/server.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/server.dir/server.c.i"
-	cd /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/server.c > CMakeFiles/server.dir/server.c.i
+	cd /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/src/server.c > CMakeFiles/server.dir/server.c.i
 
 src/CMakeFiles/server.dir/server.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/server.dir/server.c.s"
-	cd /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src/server.c -o CMakeFiles/server.dir/server.c.s
+	cd /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/src/server.c -o CMakeFiles/server.dir/server.c.s
 
 # Object files for target server
 server_OBJECTS = \
@@ -93,18 +93,18 @@ server_EXTERNAL_OBJECTS =
 bin/server: src/CMakeFiles/server.dir/server.c.o
 bin/server: src/CMakeFiles/server.dir/build.make
 bin/server: src/CMakeFiles/server.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable ../bin/server"
-	cd /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/server.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable ../bin/server"
+	cd /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/server.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 src/CMakeFiles/server.dir/build: bin/server
 .PHONY : src/CMakeFiles/server.dir/build
 
 src/CMakeFiles/server.dir/clean:
-	cd /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && $(CMAKE_COMMAND) -P CMakeFiles/server.dir/cmake_clean.cmake
+	cd /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src && $(CMAKE_COMMAND) -P CMakeFiles/server.dir/cmake_clean.cmake
 .PHONY : src/CMakeFiles/server.dir/clean
 
 src/CMakeFiles/server.dir/depend:
-	cd /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/src /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src /home/kanu/Documents/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/server.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/src /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src /home/kanu/Documents/RNPv2/RNP/Praktikum3/rn-exercise3-template/template/cmake-build-debug/src/CMakeFiles/server.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : src/CMakeFiles/server.dir/depend
 
