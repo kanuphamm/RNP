@@ -96,6 +96,7 @@ void my_recv(char* buf, int sockfd, FILE *stream){
     int nbytes;
     int run = 1;
     char endOfFile = 4;
+    memset(buf, 0, MAX_BUFFER_SIZE);
     while ( (run == 1) && (nbytes = recv(sockfd, buf, MAX_BUFFER_SIZE -1, 0)) > 0  ) {
         char* eofPointer = strchr(buf, endOfFile);
         if (eofPointer != NULL) {
@@ -179,23 +180,6 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
         
     }
     return 1;
-}
-
-
-void receiveCommand(int sockfd)
-{
-    ssize_t bytesRead;
-    char buffer[MAX_BUFFER_SIZE];
-    // Empfange und drucke die Serverantwort
-    if((bytesRead = recv(sockfd, buffer, sizeof(buffer) - 1, 0)) > 0) {
-        buffer[bytesRead] = '\0';
-        printf("%s", buffer);
-        printf("Bytes gelesen: %ld\n", bytesRead);
-    }
-
-    if (bytesRead == -1) {
-        perror("Fehler beim Empfangen der Daten");
-    }
 }
 
 
@@ -284,26 +268,21 @@ int main(int argc, char *argv[])
 //Command Manager------------------------------------
         if (strcmp(tokens[0], "List") == 0) {
             bytesSent = send(sockfd, tokens[0], strlen(tokens[0]), 0);
-            if (bytesSent < 0) {
-                perror("Fehler beim Senden");
-                exit(1);
-            }
-            receiveCommand(sockfd);
+            my_sendEOF(sockfd);
+            my_recv(buffer_stream, sockfd, stdout);
         }
         else if(strcmp(tokens[0], "Files") == 0){
             bytesSent = send(sockfd, tokens[0], strlen(tokens[0]), 0);
-            if (bytesSent < 0) {
-                perror("Fehler beim Senden");
-                exit(1);
-            }
-            receiveCommand(sockfd);
+            my_sendEOF(sockfd);
+
+            my_recv(buffer_stream, sockfd, stdout);
         }
         else if(strcmp(tokens[0], "Get") == 0){
 
         }
         else if(strcmp(tokens[0], "Put") == 0 && numTokens == 2) {
             handlePutCommand( tokens[1], tokens[0], sockfd, buffer_stream);
-            receiveCommand(sockfd);
+            my_recv(buffer_stream, sockfd, stdout);
         }
         else if(strcmp(tokens[0], "Quit") == 0){
             ClientIsRunning = 0;

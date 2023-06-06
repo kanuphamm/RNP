@@ -27,41 +27,14 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-void handleListCommand(int *client_sockets, int num_clients, int sockfd)
-{
-    int j;
-    char message[BUFFER_SIZE];
-    int messageLength = 0;
 
-    for (j = 0; j < num_clients; j++)
-    {
-        struct sockaddr_storage clientAddr;
-        socklen_t addrLen = sizeof(clientAddr);
-        //get info of network connection
-        getpeername(client_sockets[j], (struct sockaddr *)&clientAddr, &addrLen);
-
-        char clientHost[NI_MAXHOST];
-        char clientPort[NI_MAXSERV];
-
-        //get ip
-        getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
-
-        // Append client information to the message
-        messageLength += snprintf(message + messageLength, sizeof(message) - messageLength, "%s:%s\n", clientHost, clientPort);
-    }
-
-    // Append the number of clients to the message
-    messageLength += snprintf(message + messageLength, sizeof(message) - messageLength, "%d Clients connected\n", num_clients);
-
-    // Send the message to the desired socket
-    send(sockfd, message, messageLength, 0);
-}
 
 
 void my_recv(char* buf, int sockfd, FILE *stream){
     int nbytes;
     int run = 1;
     char endOfFile = 4;
+    memset(buf, 0, BUFFER_SIZE);
     while ( (run == 1) && (nbytes = recv(sockfd, buf, BUFFER_SIZE -1, 0)) > 0  ) {
         char* eofPointer = strchr(buf, endOfFile);
         if (eofPointer != NULL) {
@@ -90,13 +63,43 @@ int my_checkBufEOF(char* buf){
     char endOfFile = 4;
     char* eofPointer = strchr(buf, endOfFile);
     if (eofPointer != NULL) {
-        *eofPointer = '\0';
+        //eofPointer = " ";
         return 1;
     }
 
     return -1;
 }
 
+
+void handleListCommand(int *client_sockets, int num_clients, int sockfd,char* message)
+{
+    int j;
+    int messageLength = 0;
+    memset(message, 0, BUFFER_SIZE);
+    for (j = 0; j < num_clients; j++)
+    {
+        struct sockaddr_storage clientAddr;
+        socklen_t addrLen = sizeof(clientAddr);
+        //get info of network connection
+        getpeername(client_sockets[j], (struct sockaddr *)&clientAddr, &addrLen);
+
+        char clientHost[NI_MAXHOST];
+        char clientPort[NI_MAXSERV];
+
+        //get ip
+        getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+
+        // Append client information to the message
+        messageLength += snprintf(message + messageLength, BUFFER_SIZE - messageLength, "%s:%s\n", clientHost, clientPort);
+    }
+
+    // Append the number of clients to the message
+    messageLength += snprintf(message + messageLength, BUFFER_SIZE - messageLength, "%d Clients connected\n", num_clients);
+
+    // Send the message to the desired socket
+    send(sockfd, message, messageLength, 0);
+    my_sendEOF(sockfd);
+}
 
 int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char* buf, int i, char* filename )
 {   
@@ -107,7 +110,6 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
     char* pathAndFileName = (char*)malloc(length * sizeof(char));
     if (pathAndFileName == NULL) {
         printf("Memory allocation failed.\n");
-        return -1;
     }
     strcpy(pathAndFileName, verzeichnis);
     strcat(pathAndFileName, filename);
@@ -116,7 +118,6 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
     file = fopen(pathAndFileName, "w");
     if (file == NULL) {
     printf("Failed to open the file.\n");
-        return -1;
     }
     my_recv(buf, i, file);
     fclose(file);
@@ -141,17 +142,18 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
     return 1;
 }
 
-void handleFileCommand(const char* directory, int clientSocket) {
+void handleFileCommand(const char* directory, int clientSocket, char* buffer) {
     DIR* dir;
     struct dirent* entry;
     struct stat attrib;
-
+    fflush(stdout);
     // Verzeichnis öffnen
     dir = opendir(directory);
-
+    memset(buffer, 0, BUFFER_SIZE);
     int cntDatein = 0;
     if (dir) {
         while ((entry = readdir(dir)) != NULL) {
+            fflush(stdout);
             // Den vollen Pfad zum Eintrag erstellen
             char pfad[BUFFER_SIZE];
             sprintf(pfad, "%s/%s", directory, entry->d_name);
@@ -162,7 +164,6 @@ void handleFileCommand(const char* directory, int clientSocket) {
             // Nur reguläre Dateien berücksichtigen
             if (S_ISREG(attrib.st_mode)) {
                 // Dateiname und Attribute in eine Zeichenkette formatieren
-                char buffer[1024];
                 sprintf(buffer, "%s\tLast Modified: %s\tSize: %lld bytes\n",
                         entry->d_name,
                         ctime(&attrib.st_mtime),
@@ -170,16 +171,22 @@ void handleFileCommand(const char* directory, int clientSocket) {
 
                 // Daten an den Clienten senden
                 send(clientSocket, buffer, strlen(buffer), 0);
+                memset(buffer, 0, BUFFER_SIZE);
                 cntDatein++;
             }
         }
-        //<N> Dateien
+        //<N> Dateien "%d daten",cntdaten
+        sprintf(buffer, "%d Dateien", cntDatein);
+        send(clientSocket, buffer, strlen(buffer), 0);
+        memset(buffer, 0, BUFFER_SIZE);
         // Verzeichnis schließen
         closedir(dir);
     } else {
         printf("Fehler beim Öffnen des Verzeichnisses\n");
-        return;
     }
+    fflush(stdout);
+    my_sendEOF(clientSocket);
+    return;
 }
 
 
@@ -303,12 +310,12 @@ int main(void)
                     // -----------------handle data from a client
                     memset(buf, 0, BUFFER_SIZE);
                     if ((nbytes = recv(i, buf, BUFFER_SIZE -1, 0)) > 0) {//-1 ensures that there is space left for a null terminator at the end of the received data.
-                        printf("Message received: %s\n", buf);
+                        printf("Message received: <%s>\n", buf);
                         if(my_checkBufEOF(buf) == 1){                            
                             // got error or connection closed by client
                             
 
-                            char delimiter[] = " \0\n";
+                            char delimiter[] = " \4\0"; //leerzeiche oder EOT
                             char* token;
                             const int  numTokens = 2;
                             char** tokens = malloc(sizeof(char*) * numTokens);  // Speicher für maximal 2 Tokens reservieren
@@ -327,14 +334,17 @@ int main(void)
                                 token = strtok(NULL, delimiter);
                                 cntTokens++;
                             }
+                            printf("Message received after tocken: %s\n", buf);
 
                             // -----------------Command: List                        
                             if (strcmp(tokens[0], "List") == 0) {
-                                handleListCommand(client_sockets, num_clients, i);
+                                handleListCommand(client_sockets, num_clients, i,buf);
                             // -----------------Command: Files                            
                             } else if (strcmp(tokens[0], "Files") == 0) {
                                 const char* verzeichnis = "../../src/storageServer/";
-                                handleFileCommand(verzeichnis, i); // i ist der clientSocket
+                                printf("Command Files\n");
+                                fflush(stdout);
+                                handleFileCommand(verzeichnis, i,buf); // i ist der clientSocket
                             } else if (strcmp(tokens[0], "Get") == 0) {
                                 printf("Get\n");
                             // -----------------Command: Put                            
@@ -347,6 +357,9 @@ int main(void)
                                 free(tokens[i]);
                             }
                             free(tokens);
+                        }else{
+                            printf("kein EOT erkannt!\n");
+                            fflush(stdout);
                         }
                     } else {
                         if (nbytes == 0) {
