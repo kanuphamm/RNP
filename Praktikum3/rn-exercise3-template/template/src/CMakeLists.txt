@@ -6,11 +6,16 @@ function(add_bin name)
   target_compile_options(${name} PUBLIC -g -O2 -Wno-error -Wall -Wextra)
   if (NOT APPLE)
     target_compile_options(${name} PUBLIC
-                             -fsanitize=address
-                             -fno-omit-frame-pointer)
+                           -fsanitize=address
+                           -fno-omit-frame-pointer)
   endif()
 endfunction()
 
 add_bin(client)
 add_bin(server)
+
+# Add commandHandlerfile.c and commandHandlerfile.h to the server
+target_sources(server PUBLIC cmdHandlerServer.c)
+target_include_directories(server PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 
