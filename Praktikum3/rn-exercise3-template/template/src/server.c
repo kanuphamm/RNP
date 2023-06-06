@@ -27,9 +27,12 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-void handleListCommand(int *client_sockets, int num_clients)
+void handleListCommand(int *client_sockets, int num_clients, int sockfd)
 {
     int j;
+    char message[BUFFER_SIZE];
+    int messageLength = 0;
+
     for (j = 0; j < num_clients; j++)
     {
         struct sockaddr_storage clientAddr;
@@ -43,10 +46,57 @@ void handleListCommand(int *client_sockets, int num_clients)
         //get ip
         getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
-        printf("%s:%s\n", clientHost, clientPort);
+        // Append client information to the message
+        messageLength += snprintf(message + messageLength, sizeof(message) - messageLength, "%s:%s\n", clientHost, clientPort);
     }
-    printf("%d Clients connected\n", num_clients);
+
+    // Append the number of clients to the message
+    messageLength += snprintf(message + messageLength, sizeof(message) - messageLength, "%d Clients connected\n", num_clients);
+
+    // Send the message to the desired socket
+    send(sockfd, message, messageLength, 0);
 }
+
+
+void my_recv(char* buf, int sockfd, FILE *stream){
+    int nbytes;
+    int run = 1;
+    char endOfFile = 4;
+    while ( (run == 1) && (nbytes = recv(sockfd, buf, BUFFER_SIZE -1, 0)) > 0  ) {
+        char* eofPointer = strchr(buf, endOfFile);
+        if (eofPointer != NULL) {
+            run = 0;
+            *eofPointer = '\0';
+        }
+        fprintf(stream, "%s", buf);
+        fflush(stream);
+        memset(buf, 0, BUFFER_SIZE);
+    }
+}
+
+int my_sendEOF(int sockfd){
+    ssize_t bytesSent = 0;
+    char endOfFile = '\4';
+    char* ptrEndOfFile = &endOfFile;
+    bytesSent = send(sockfd, ptrEndOfFile, sizeof(char), 0);
+    if (bytesSent < 0) {
+        perror("Fehler beim Senden endOfLine");
+        return -1;
+    }
+    return bytesSent;
+}
+
+int my_checkBufEOF(char* buf){
+    char endOfFile = 4;
+    char* eofPointer = strchr(buf, endOfFile);
+    if (eofPointer != NULL) {
+        *eofPointer = '\0';
+        return 1;
+    }
+
+    return -1;
+}
+
 
 int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char* buf, int i, char* filename )
 {   
@@ -68,24 +118,7 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
     printf("Failed to open the file.\n");
         return -1;
     }
-
-    int nbytes;
-    int run = 1;
-    char endOfFile = 4;
-    while ( (run == 1) && (nbytes = recv(i, buf, BUFFER_SIZE -1, 0)) > 0  ) {
-        
-        char* eofPointer = strchr(buf, endOfFile);
-        if (eofPointer != NULL) {
-            printf("\nENDE File Erkannt!\n");
-            run = 0;
-            *eofPointer = '\0';
-        }
-        fprintf(file, "%s", buf);
-        printf("\n<Recived: %s>\n",buf);
-        fflush(stdout);
-        fflush(file);
-        memset(buf, 0, BUFFER_SIZE);
-    }
+    my_recv(buf, i, file);
     fclose(file);
 
     //Print Meta Data
@@ -100,10 +133,11 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
     char serverIP[NI_MAXHOST];
     getnameinfo((struct sockaddr *)&remoteaddr, addrlen, serverHost, NI_MAXHOST, serverIP, NI_MAXHOST, NI_NUMERICHOST);
 
-    printf("OK %s\n", serverHost);
-    printf("%s\n", serverIP);
-    printf("%s\n", timeString);
+    char message[512];
 
+    snprintf(message, sizeof(message), "OK %s\n%s\n%s\n", serverHost, serverIP, timeString);
+    send(i, message, sizeof(message), 0);
+    my_sendEOF(i);
     return 1;
 }
 
@@ -115,10 +149,11 @@ void handleFileCommand(const char* directory, int clientSocket) {
     // Verzeichnis öffnen
     dir = opendir(directory);
 
+    int cntDatein = 0;
     if (dir) {
         while ((entry = readdir(dir)) != NULL) {
             // Den vollen Pfad zum Eintrag erstellen
-            char pfad[1024];
+            char pfad[BUFFER_SIZE];
             sprintf(pfad, "%s/%s", directory, entry->d_name);
 
             // Dateiattribute abrufen
@@ -135,9 +170,10 @@ void handleFileCommand(const char* directory, int clientSocket) {
 
                 // Daten an den Clienten senden
                 send(clientSocket, buffer, strlen(buffer), 0);
+                cntDatein++;
             }
         }
-
+        //<N> Dateien
         // Verzeichnis schließen
         closedir(dir);
     } else {
@@ -145,6 +181,8 @@ void handleFileCommand(const char* directory, int clientSocket) {
         return;
     }
 }
+
+
 
 
 
@@ -265,50 +303,51 @@ int main(void)
                     // -----------------handle data from a client
                     memset(buf, 0, BUFFER_SIZE);
                     if ((nbytes = recv(i, buf, BUFFER_SIZE -1, 0)) > 0) {//-1 ensures that there is space left for a null terminator at the end of the received data.
-                     
-                        // got error or connection closed by client
                         printf("Message received: %s\n", buf);
+                        if(my_checkBufEOF(buf) == 1){                            
+                            // got error or connection closed by client
+                            
 
-                        char delimiter[] = " \0\n";
-                        char* token;
-                        const int  numTokens = 2;
-                        char** tokens = malloc(sizeof(char*) * numTokens);  // Speicher für maximal 2 Tokens reservieren
-                        int cntTokens = 0;
-                        
-                        token = strtok(buf, delimiter);
-                        while ( (token != NULL) && ( cntTokens < numTokens) ) {
-                            size_t token_len = strlen(token);
-                            printf("<strlen: token %ld>\n",token_len);
-                            fflush(stdout);
-                            tokens[cntTokens] = malloc(token_len + 1);  // Speicher für das Token reservieren
-                            strcpy(tokens[cntTokens], token);
-                            tokens[cntTokens][strcspn(tokens[cntTokens], "\n")] = '\0';
-                            printf("GetToken:<%s>\n", tokens[cntTokens]);
-                            fflush(stdout);
-                            token = strtok(NULL, delimiter);
-                            cntTokens++;
+                            char delimiter[] = " \0\n";
+                            char* token;
+                            const int  numTokens = 2;
+                            char** tokens = malloc(sizeof(char*) * numTokens);  // Speicher für maximal 2 Tokens reservieren
+                            int cntTokens = 0;
+                            
+                            token = strtok(buf, delimiter);
+                            while ( (token != NULL) && ( cntTokens < numTokens) ) {
+                                size_t token_len = strlen(token);
+                                printf("<strlen: token %ld>\n",token_len);
+                                fflush(stdout);
+                                tokens[cntTokens] = malloc(token_len + 1);  // Speicher für das Token reservieren
+                                strcpy(tokens[cntTokens], token);
+                                tokens[cntTokens][strcspn(tokens[cntTokens], "\n")] = '\0';
+                                printf("GetToken:<%s>\n", tokens[cntTokens]);
+                                fflush(stdout);
+                                token = strtok(NULL, delimiter);
+                                cntTokens++;
+                            }
+
+                            // -----------------Command: List                        
+                            if (strcmp(tokens[0], "List") == 0) {
+                                handleListCommand(client_sockets, num_clients, i);
+                            // -----------------Command: Files                            
+                            } else if (strcmp(tokens[0], "Files") == 0) {
+                                const char* verzeichnis = "../../src/storageServer/";
+                                handleFileCommand(verzeichnis, i); // i ist der clientSocket
+                            } else if (strcmp(tokens[0], "Get") == 0) {
+                                printf("Get\n");
+                            // -----------------Command: Put                            
+                            } else if (strcmp(tokens[0], "Put") == 0) {
+                                handlePutCommand(remoteaddr, addrlen, buf, i, tokens[1]);
+                            }
+
+                            // Speicher für Tokens freigeben
+                            for (int i = 0; i < cntTokens; i++) {
+                                free(tokens[i]);
+                            }
+                            free(tokens);
                         }
-
-                        // -----------------Command: List                        
-                        if (strcmp(tokens[0], "List") == 0) {
-                            handleListCommand(client_sockets, num_clients);
-                        // -----------------Command: Files                            
-                        } else if (strcmp(tokens[0], "Files") == 0) {
-                            const char* verzeichnis = "../../src/storageServer/";
-                            handleFileCommand(verzeichnis, i); // i ist der clientSocket
-                        } else if (strcmp(tokens[0], "Get") == 0) {
-                            printf("Get\n");
-                        // -----------------Command: Put                            
-                        } else if (strcmp(tokens[0], "Put") == 0) {
-                            handlePutCommand(remoteaddr, addrlen, buf, i, tokens[1]);
-                        }
-
-                        // Speicher für Tokens freigeben
-                        for (int i = 0; i < cntTokens; i++) {
-                            free(tokens[i]);
-                        }
-                        free(tokens);
-
                     } else {
                         if (nbytes == 0) {
                             // connection closed
