@@ -69,15 +69,12 @@ int main(void)
         if (listener < 0) { 
             continue;
         }
-        
         // lose the pesky "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
             close(listener);
             continue;
         }
-
         break;
     }
 
@@ -97,7 +94,6 @@ int main(void)
 
     // add the listener to the master set
     FD_SET(listener, &master);
-
 
     // keep track of the biggest file descriptor
     fdmax = listener; // so far, it's this one

@@ -1,5 +1,12 @@
 #include "cmdHandlerClient.h"
 
+
+/**
+ * Gibt den absoluten Dateipfad für einen gegebenen relativen Dateipfad zurück.
+ *
+ * @param filepath Der relative Dateipfad.
+ * @return Der absolute Dateipfad oder NULL bei einem Fehler.
+ */
 char* getAbsolutePath( char * filepath) { //"../../src/storageClient"
     const char* relativePath = filepath;
     char* path = (char*)malloc(PATH_MAX * sizeof(char));
@@ -33,6 +40,14 @@ char* getAbsolutePath( char * filepath) { //"../../src/storageClient"
     }
 }
 
+
+/**
+ * Gibt den vollständigen Dateipfad durch Verknüpfen des absoluten Pfads und des Dateinamens zurück.
+ *
+ * @param absolutePath Der absolute Dateipfad.
+ * @param filename Der Dateiname.
+ * @return Der vollständige Dateipfad oder NULL bei einem Fehler.
+ */
 char* get_file_path(const char* absolutePath, const char* filename) {
     // Calculate the required buffer size for the concatenated string
     int bufferSize = snprintf(NULL, 0, "%s%s", absolutePath, filename);
@@ -55,6 +70,13 @@ char* get_file_path(const char* absolutePath, const char* filename) {
     return filePath;
 }
 
+
+/**
+ * Sendet das EOF-Zeichen an den Server.
+ *
+ * @param sockfd Der Socket-Deskriptor.
+ * @return Die Anzahl der gesendeten Bytes oder -1 bei einem Fehler.
+ */
 int my_sendEOF(int sockfd){
     ssize_t bytesSent = 0;
     char endOfFile = '\4';
@@ -67,6 +89,14 @@ int my_sendEOF(int sockfd){
     return bytesSent;
 }
 
+
+/**
+ * Empfängt Daten vom Server und schreibt sie in einen Stream (Datei).
+ *
+ * @param buf Der Puffer zum Speichern der empfangenen Daten.
+ * @param sockfd Der Socket-Deskriptor.
+ * @param stream Der Ziel-Stream (Datei).
+ */
 void my_recv(char* buf, int sockfd, FILE *stream){
     int nbytes;
     int run = 1;
@@ -85,7 +115,15 @@ void my_recv(char* buf, int sockfd, FILE *stream){
 }
 
 
-
+/**
+ * Behandelt den "Put"-Befehl, um eine Datei an den Server zu senden.
+ *
+ * @param filename Der Dateiname.
+ * @param command Der Befehl.
+ * @param sockfd Der Socket-Deskriptor.
+ * @param buffer_stream Der Puffer zum Speichern der Dateidaten.
+ * @return 1 bei Erfolg, -1 bei einem Fehler.
+ */
 int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_stream)
 {
     FILE* file;
@@ -138,21 +176,21 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
 
         // Datei zeilenweise lesen und an den Server senden
         while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
-            bytesSent = send(sockfd, buffer_stream, strlen(buffer_stream), 0);
+            if(bytesSent = send(sockfd, buffer_stream, strlen(buffer_stream), 0) > 0){
             printf("Send: %s",buffer_stream);
-            if (bytesSent < 0) {
-                perror("Fehler beim Senden der Daten");
-                free(absolutePath);
-                free(filePath);
-                fclose(file);
-                return -1;
             }
+                else if(bytesSent < 0) {
+                    perror("Fehler beim Senden der Daten");
+                    free(absolutePath);
+                    free(filePath);
+                    fclose(file);
+                    return -1;
+                }
         }
         my_sendEOF(sockfd);
         free(absolutePath);
         free(filePath);
         fclose(file);
-        
     }
     return 1;
 }

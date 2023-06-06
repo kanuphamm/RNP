@@ -16,7 +16,7 @@ cd bin/
 start_terminal "./server" &
 sleep 1
 start_terminal "./client" &
-#start_terminal "./client" &
+start_terminal "./client" &
 #start_terminal "./client" &
 
 # Funktion zum Schließen aller Terminals und Prozesse
