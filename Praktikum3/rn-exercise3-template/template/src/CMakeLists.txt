@@ -14,7 +14,12 @@ endfunction()
 add_bin(client)
 add_bin(server)
 
-# Add commandHandlerfile.c and commandHandlerfile.h to the server
+
+# Add dependencies to client
+target_sources(client PUBLIC cmdHandlerClient.c)
+target_include_directories(client PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Add dependencies to the server
 target_sources(server PUBLIC cmdHandlerServer.c)
 target_include_directories(server PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

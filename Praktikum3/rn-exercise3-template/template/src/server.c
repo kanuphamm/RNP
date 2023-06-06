@@ -15,7 +15,6 @@
 
 #define MAX_CLIENTS 25 // maximum number of clients
 #define PORT "7777"   // port we're listening on
-#define BUFFER_SIZE 1024
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)

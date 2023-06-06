@@ -1,5 +1,5 @@
 #include "cmdHandlerServer.h"
-#define BUFFER_SIZE 1024
+
 
 /**
  * Handle the "list" command by retrieving information about connected clients and sending it to the desired socket.
@@ -160,7 +160,7 @@ void my_recv(char* buf, int sockfd, FILE *stream){
     int run = 1;
     char endOfFile = 4;
     memset(buf, 0, BUFFER_SIZE);
-    while ( (run == 1) && (nbytes = recv(sockfd, buf, BUFFER_SIZE -1, 0)) > 0  ) {
+    if(nbytes = recv(sockfd, buf, BUFFER_SIZE -1, 0) > 0  ) {
         char* eofPointer = strchr(buf, endOfFile);
         if (eofPointer != NULL) {
             run = 0;
