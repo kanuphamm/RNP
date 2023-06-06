@@ -101,7 +101,7 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
     }else{
         // Calculate the length of the concatenated string
         char space[] = " ";
-        size_t length = strlen(command) + 2*strlen(space) +strlen(filename) + 1; //TODO frage +1
+        size_t length = strlen(command) + strlen(space) +strlen(filename) + 1; //TODO frage +1
 
         // Allocate memory for the concatenated string
         char* concatenated = (char*)malloc(length * sizeof(char));
@@ -116,7 +116,6 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
         strcpy(concatenated, command);
         strcat(concatenated, space);
         strcat(concatenated, filename);
-        strcat(concatenated, space);
 
         //Send Command Put <dateiname>
         bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
@@ -128,6 +127,8 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
             return -1;
         }
         free(concatenated);
+
+sleep(5);
 
         // Datei zeilenweise lesen und an den Server senden
         while (fgets(buffer_stream, MAX_BUFFER_SIZE, file) != NULL) {
@@ -141,9 +142,11 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
                 return -1;
             }
         }
-        bytesSent = send(sockfd, "EOF", strlen("EOF"), 0);
+        char endOfFile = '\4';
+        char* ptrEndOfFile = &endOfFile;
+        bytesSent = send(sockfd, ptrEndOfFile, sizeof(char), 0);
         if (bytesSent < 0) {
-            perror("Fehler beim Senden der Daten");
+            perror("Fehler beim Senden endOfLine");
             free(absolutePath);
             free(filePath);
             fclose(file);

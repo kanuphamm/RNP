@@ -71,11 +71,15 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
 
     int nbytes;
     int run = 1;
+    char endOfFile = 4;
     while ( (run == 1) && (nbytes = recv(i, buf, BUFFER_SIZE -1, 0)) > 0  ) {
-        /*if (strstr(buf, "EOF") != NULL) {
+        
+        char* eofPointer = strchr(buf, endOfFile);
+        if (eofPointer != NULL) {
             printf("\nENDE File Erkannt!\n");
             run = 0;
-        }*/
+            *eofPointer = '\0';
+        }
         fprintf(file, "%s", buf);
         printf("\n<Recived: %s>\n",buf);
         fflush(stdout);
