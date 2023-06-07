@@ -12,8 +12,8 @@
 #include "cmdHandlerClient.h"
 #include "myHelperFunctions.h"
 
-#define PORT "7777" // the port client will be connecting to 
-#define SRV_ADDRESS "127.0.0.1"
+//#define PORT "7777" // the port client will be connecting to 
+//#define SRV_ADDRESS "127.0.0.1"
 #define MAX_BUFFER_SIZE 1024
 
 // get sockaddr, IPv4 or IPv6:
@@ -21,9 +21,11 @@ void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
+    } else if (sa->sa_family == AF_INET6) {
+        return &(((struct sockaddr_in6*)sa)->sin6_addr);
     }
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+    return NULL;
 }
 
 
@@ -31,22 +33,33 @@ int main(int argc, char *argv[])
 {
     static const char* verzeichnis = "../../src/storageClient/"; //speicherverzeichnis für Files
 
-    printf("argc: %d",argc);
-    printf("argv[0]: %s",argv[0]);
+    printf("<argc: %d\n>",argc);
+    for(int i = 0; i< argc; i++){
+        printf("<argv[%d]: %s\n>",i,argv[i]);
+    }
+    
+    const char *restrict SRV_ADDRESS = argv[1]; // TODO: Remove cast and parse arguments.
+
+    const char *restrict PORT = argv[2]; // TODO: Remove cast and parse arguments.
+    
+    
+    
     int sockfd;  
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
     ssize_t bytesSent = 0;
+
+
     
     /*if (argc != 2) {
         fprintf(stderr,"usage: client hostname\n");
         exit(1);
     }*/
 
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
+    memset(&hints, 0, sizeof hints);    //make sure struct is empty
+    hints.ai_family = AF_UNSPEC;        // dont care Ipv4 or IPv6
+    hints.ai_socktype = SOCK_STREAM;    //TCP stream socket
 
     if ((rv = getaddrinfo(SRV_ADDRESS, PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));

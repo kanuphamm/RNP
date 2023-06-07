@@ -15,8 +15,8 @@ make -j 1
 cd bin/
 start_terminal "./server" &
 sleep 1
-start_terminal "./client" &
-#start_terminal "./client" &
+#start_terminal "./client 127.0.0.1 7777" &
+start_terminal "./client ::1 7777" &
 #start_terminal "./client" &
 
 # Funktion zum Schließen aller Terminals und Prozesse

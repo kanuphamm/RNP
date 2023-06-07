@@ -22,11 +22,16 @@
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
+    printf("connet detected!\n");
     if (sa->sa_family == AF_INET) {
+        printf("IPv4 detected!\n");
         return &(((struct sockaddr_in*)sa)->sin_addr);
+    } else if (sa->sa_family == AF_INET6) {
+        printf("IPv6 detected!\n");
+        return &(((struct sockaddr_in6*)sa)->sin6_addr);
     }
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+    return NULL;
 }
 
 int main(void)
@@ -77,7 +82,7 @@ int main(void)
         }
         
         // lose the pesky "address already in use" error message
-        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
             close(listener);
