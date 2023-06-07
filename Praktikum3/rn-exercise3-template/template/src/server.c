@@ -11,6 +11,7 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include "cmdHandlerServer.h"
 
 
 #define MAX_CLIENTS 25 // maximum number of clients
@@ -26,8 +27,6 @@ void *get_in_addr(struct sockaddr *sa)
 
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
-
-
 
 
 void my_recv(char* buf, int sockfd, FILE *stream){
@@ -66,141 +65,6 @@ int my_sendEOF(int sockfd){
     return bytesSent;
 }
 
-int my_checkBufEOF(char* buf){
-    char endOfFile = 4;
-    char* eofPointer = strchr(buf, endOfFile);
-    if (eofPointer != NULL) {
-        //eofPointer = " ";
-        return 1;
-    }
-
-    return -1;
-}
-
-
-void handleListCommand(int *client_sockets, int num_clients, int sockfd,char* message)
-{
-    int j;
-    int messageLength = 0;
-    memset(message, 0, BUFFER_SIZE);
-    for (j = 0; j < num_clients; j++)
-    {
-        struct sockaddr_storage clientAddr;
-        socklen_t addrLen = sizeof(clientAddr);
-        //get info of network connection
-        getpeername(client_sockets[j], (struct sockaddr *)&clientAddr, &addrLen);
-
-        char clientHost[NI_MAXHOST];
-        char clientPort[NI_MAXSERV];
-
-        //get ip
-        getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
-
-        // Append client information to the message
-        messageLength += snprintf(message + messageLength, BUFFER_SIZE - messageLength, "%s:%s\n", clientHost, clientPort);
-    }
-
-    // Append the number of clients to the message
-    messageLength += snprintf(message + messageLength, BUFFER_SIZE - messageLength, "%d Clients connected\n", num_clients);
-
-    // Send the message to the desired socket
-    send(sockfd, message, messageLength, 0);
-    my_sendEOF(sockfd);
-}
-
-int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char* buf, int i, char* filename )
-{   
-
-    FILE *file;
-    const char* verzeichnis = "../../src/storageServer/";
-    size_t length = strlen(verzeichnis) + strlen(filename) + 1; //TODO frage +1
-    char* pathAndFileName = (char*)malloc(length * sizeof(char));
-    if (pathAndFileName == NULL) {
-        printf("Memory allocation failed.\n");
-    }
-    strcpy(pathAndFileName, verzeichnis);
-    strcat(pathAndFileName, filename);
-    printf("<%s>\n",pathAndFileName);
-    fflush(stdout);
-    file = fopen(pathAndFileName, "w");
-    if (file == NULL) {
-        printf("Failed to open the file.\n");
-    }
-    fflush(stdout);
-    my_recv(buf, i, file);
-    fclose(file);
-    fflush(stdout);
-
-    //Print Meta Data
-    time_t currentTime;
-    struct tm *timeInfo;
-    char timeString[20];
-    time(&currentTime);
-    timeInfo = localtime(&currentTime);
-    strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", timeInfo);
-
-    char serverHost[NI_MAXHOST];
-    char serverIP[NI_MAXHOST];
-    getnameinfo((struct sockaddr *)&remoteaddr, addrlen, serverHost, NI_MAXHOST, serverIP, NI_MAXHOST, NI_NUMERICHOST);
-
-    char message[512];
-
-    snprintf(message, sizeof(message), "OK %s\n%s\n%s\n\4", serverHost, serverIP, timeString);
-    send(i, message, sizeof(message), 0);
-    //my_sendEOF(i);
-    printf("PUTEOT gesendet!");
-    fflush(stdout);
-    return 1;
-}
-
-void handleFileCommand(const char* directory, int clientSocket, char* buffer) {
-    DIR* dir;
-    struct dirent* entry;
-    struct stat attrib;
-    fflush(stdout);
-    // Verzeichnis öffnen
-    dir = opendir(directory);
-    memset(buffer, 0, BUFFER_SIZE);
-    int cntDatein = 0;
-    if (dir) {
-        while ((entry = readdir(dir)) != NULL) {
-            fflush(stdout);
-            // Den vollen Pfad zum Eintrag erstellen
-            char pfad[BUFFER_SIZE];
-            sprintf(pfad, "%s/%s", directory, entry->d_name);
-
-            // Dateiattribute abrufen
-            stat(pfad, &attrib);
-
-            // Nur reguläre Dateien berücksichtigen
-            if (S_ISREG(attrib.st_mode)) {
-                // Dateiname und Attribute in eine Zeichenkette formatieren
-                sprintf(buffer, "%s\tLast Modified: %s\tSize: %lld bytes\n",
-                        entry->d_name,
-                        ctime(&attrib.st_mtime),
-                        (long long)attrib.st_size);
-
-                // Daten an den Clienten senden
-                send(clientSocket, buffer, strlen(buffer), 0);
-                memset(buffer, 0, BUFFER_SIZE);
-                cntDatein++;
-            }
-        }
-        //<N> Dateien "%d daten",cntdaten
-        sprintf(buffer, "%d Dateien\n", cntDatein);
-        send(clientSocket, buffer, strlen(buffer), 0);
-        memset(buffer, 0, BUFFER_SIZE);
-        // Verzeichnis schließen
-        closedir(dir);
-    } else {
-        printf("Fehler beim Öffnen des Verzeichnisses\n");
-    }
-    fflush(stdout);
-    my_sendEOF(clientSocket);
-    printf("PUT EOT GESENDET");
-    return;
-}
-
 
 void trenneString(char* string, const char* trennzeichen, char** ersterTeil, char** zweiterTeil) {
     char* teil = strtok(string, trennzeichen);
@@ -216,15 +80,6 @@ void trenneString(char* string, const char* trennzeichen, char** ersterTeil, cha
     } else {
         *ersterTeil = NULL;
         *zweiterTeil = NULL;
-    }
-}
-
-void ersetzeZeichen(char* string, char zuErsetzen, char ersetzenMit) {
-    size_t laenge = strlen(string);
-    for (size_t i = 0; i < laenge; i++) {
-        if (string[i] == zuErsetzen) {
-            string[i] = ersetzenMit;
-        }
     }
 }
 
@@ -371,21 +226,21 @@ int main(void)
                                 memset(buf, 0, BUFFER_SIZE);
                             }
 
-                            // -----------------Command: List                        
-                            if (strcmp(tokens[2], "List") == 0) {
-                                handleListCommand(client_sockets, num_clients, i,buf);
-                            // -----------------Command: Files                            
-                            } else if (strcmp(tokens[2], "Files") == 0) {
-                                const char* verzeichnis = "../../src/storageServer/";
-                                fflush(stdout);
-                                handleFileCommand(verzeichnis, i,buf); // i ist der clientSocket
-                            } else if (strcmp(tokens[2], "Get") == 0) {
-                                printf("Get\n");
-                            // -----------------Command: Put                            
-                            } else if (strcmp(tokens[2], "Put") == 0) {
-                                handlePutCommand(remoteaddr, addrlen, buf, i, tokens[3]);
+                            // -----------------Command: List    
+                            if(tokens[2] != NULL)
+                            {   static const char* verzeichnis = "../../src/storageServer/";                 
+                                if (strcmp(tokens[2], "List") == 0) {
+                                    handleListCommand(client_sockets, num_clients, i,buf, BUFFER_SIZE);
+                                // -----------------Command: Files                            
+                                } else if (strcmp(tokens[2], "Files") == 0) {
+                                    handleFileCommand(verzeichnis, i, buf, BUFFER_SIZE); // i ist der clientSocket
+                                } else if (strcmp(tokens[2], "Get") == 0) {
+                                    printf("Get\n");
+                                // -----------------Command: Put                            
+                                } else if (strcmp(tokens[2], "Put") == 0) {
+                                    handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis);
+                                }
                             }
-
                             // Speicher für Tokens freigeben
                             for (int i = 0; i < numTokens; i++) {//TODO
                                 free(tokens[i]);

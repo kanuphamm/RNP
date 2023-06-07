@@ -9,10 +9,10 @@
 #include <sys/socket.h>
 #include <limits.h>
 #include <arpa/inet.h>
+#include "cmdHandlerClient.h"
 
 #define PORT "7777" // the port client will be connecting to 
 #define SRV_ADDRESS "127.0.0.1"
-#define MAXDATASIZE 1024 // max number of bytes we can get at once 
 #define MAX_BUFFER_SIZE 1024
 
 // get sockaddr, IPv4 or IPv6:
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
             tokens[numTokens] = malloc(strlen(token) + 1);  // Speicher für das Token reservieren
             strcpy(tokens[numTokens], token);
             tokens[numTokens][strcspn(tokens[numTokens], "\n")] = '\0';
-            printf("GetToken<%s>", tokens[numTokens]);
+            printf("Token[%d]<%s>\n",numTokens, tokens[numTokens]);
 
             token = strtok(NULL, delimiter);
             numTokens++;
