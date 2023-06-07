@@ -31,7 +31,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(void)
 {
-    static const char* verzeichnis = "../../src/storageServer/"; //speicherverzeichnis für empfangende Files
+    static const char* verzeichnis = "../../src/storageServer/"; //speicherverzeichnis für Files
 
 
     fd_set master;    // master file descriptor list
@@ -183,7 +183,35 @@ int main(void)
                                 } else if (strcmp(tokens[2], "Files") == 0) {
                                     handleFileCommand(verzeichnis, i, buf, BUFFER_SIZE); // i ist der clientSocket
                                 } else if (strcmp(tokens[2], "Get") == 0) {
-                                    printf("Get\n");
+                                    FILE* file;
+                                    ssize_t bytesSent = 0;
+                                    // Datei öffnen                    
+                                    char* absolutePath = getAbsolutePath("../../src/storageServer");
+                                    //printf("\nabsolutePath: %s\n",absolutePath);
+                                    //substring points to beginning of "Put "
+                                    char* filePath = get_file_path(absolutePath, tokens[3]);
+                                    //printf("filePath: %s\n",filePath);
+
+                                    file = fopen(filePath, "r");
+                                    if (file == NULL) {
+                                        perror("Fehler beim Öffnen der Datei ");
+                                        free(absolutePath);
+                                        free(filePath);
+                                    }else{
+                                        // Datei zeilenweise lesen und an den Server senden
+                                        while (fgets(buf, BUFFER_SIZE, file) != NULL) {
+                                            bytesSent = send(i, buf, strlen(buf), 0);
+                                            printf("Send: %s",buf);
+                                            if (bytesSent < 0) {
+                                                perror("Fehler beim Senden der Daten");
+                                            }
+                                        }
+                                        my_sendEOF(i);
+                                        free(absolutePath);
+                                        free(filePath);
+                                        fclose(file);
+                                    }
+
                                 // -----------------Command: Put                            
                                 } else if (strcmp(tokens[2], "Put") == 0) {
                                     handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis);

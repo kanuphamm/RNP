@@ -86,20 +86,20 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
     char* pathAndFileName = (char*)malloc(length * sizeof(char));
     if (pathAndFileName == NULL) {
         printf("Memory allocation failed.\n");
+        fflush(stdout);
     }
     strcpy(pathAndFileName, verzeichnis);
     strcat(pathAndFileName, filename);
-    printf("<%s>\n",pathAndFileName);
-    fflush(stdout);
+
     file = fopen(pathAndFileName, "w");
     if (file == NULL) {
         printf("Failed to open the file.\n");
+        fflush(stdout);
     }
-    fflush(stdout);
+    
     my_recv(buf, bufferSize, sockfd, file, SAVE_MODE);
     fclose(file);
     free(pathAndFileName);
-    fflush(stdout);
 
     //Print Meta Data
     time_t currentTime;

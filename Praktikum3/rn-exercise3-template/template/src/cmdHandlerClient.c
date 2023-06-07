@@ -7,10 +7,10 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
 
     // Datei öffnen                    
     char* absolutePath = getAbsolutePath("../../src/storageClient");
-    printf("\nabsolutePath: %s\n",absolutePath);
+    //printf("\nabsolutePath: %s\n",absolutePath);
     //substring points to beginning of "Put "
     char* filePath = get_file_path(absolutePath, filename);
-    printf("filePath: %s\n",filePath);
+    //printf("filePath: %s\n",filePath);
 
     file = fopen(filePath, "r");
     if (file == NULL) {

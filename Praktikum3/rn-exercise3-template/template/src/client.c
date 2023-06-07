@@ -29,6 +29,8 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(int argc, char *argv[])
 {
+    static const char* verzeichnis = "../../src/storageClient/"; //speicherverzeichnis für Files
+
     printf("argc: %d",argc);
     printf("argv[0]: %s",argv[0]);
     int sockfd;  
@@ -120,6 +122,46 @@ int main(int argc, char *argv[])
             my_recv(buffer_stream, MAX_BUFFER_SIZE, sockfd, stdout, OVERWRITE_MODE);
         }
         else if(strcmp(tokens[0], "Get") == 0){
+            char space[] = " ";
+            char EOT[] = "\4";
+            size_t length = strlen(tokens[0]) + strlen(space) +strlen(tokens[1])+ strlen(EOT)+ 1; //TODO frage +1
+            // Allocate memory for the concatenated string
+            char* concatenated = (char*)malloc(length * sizeof(char));
+            if (concatenated == NULL) {
+                printf("Memory allocation failed.\n");
+            }
+
+            strcpy(concatenated, tokens[0]);
+            strcat(concatenated, space);
+            strcat(concatenated, tokens[1]);
+            strcat(concatenated, EOT);
+
+            //Send Command Put <dateiname>
+            bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
+            if (bytesSent < 0) {
+                perror("Fehler beim Senden");
+            }
+            free(concatenated);
+
+            FILE *file;
+            length = strlen(verzeichnis) + strlen(tokens[1]) + 1; 
+            char* pathAndFileName = (char*)malloc(length * sizeof(char));
+            if (pathAndFileName == NULL) {
+                printf("Memory allocation failed.\n");
+                fflush(stdout);
+            }
+            strcpy(pathAndFileName, verzeichnis);
+            strcat(pathAndFileName, tokens[1]);
+
+            file = fopen(pathAndFileName, "w");
+            if (file == NULL) {
+                printf("Failed to open the file.\n");
+                fflush(stdout);
+            }
+            
+            my_recv(buffer_stream, MAX_BUFFER_SIZE, sockfd, file, OVERWRITE_MODE);
+            fclose(file);
+            free(pathAndFileName);
 
         }
         else if(strcmp(tokens[0], "Put") == 0 && numTokens == 2) {
