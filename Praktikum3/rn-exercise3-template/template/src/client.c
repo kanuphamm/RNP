@@ -39,7 +39,6 @@ int main(int argc, char *argv[])
     }
     
     const char *restrict SRV_ADDRESS = argv[1]; // TODO: Remove cast and parse arguments.
-
     const char *restrict PORT = argv[2]; // TODO: Remove cast and parse arguments.
     
     
@@ -52,14 +51,16 @@ int main(int argc, char *argv[])
 
 
     
-    /*if (argc != 2) {
+    if (argc != 3) {
         fprintf(stderr,"usage: client hostname\n");
         exit(1);
-    }*/
+    }
 
     memset(&hints, 0, sizeof hints);    //make sure struct is empty
     hints.ai_family = AF_UNSPEC;        // dont care Ipv4 or IPv6
     hints.ai_socktype = SOCK_STREAM;    //TCP stream socket
+    hints.ai_flags = 0;
+    hints.ai_protocol = 0;
 
     if ((rv = getaddrinfo(SRV_ADDRESS, PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
