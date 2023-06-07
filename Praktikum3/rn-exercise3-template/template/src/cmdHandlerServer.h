@@ -14,6 +14,10 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include "myHelperFunctions.h"
+
+extern int my_sendEOF(int sockfd);
+extern void my_recv(char* buf,size_t bufferSize, int sockfd, FILE *stream);
 
 extern void handleListCommand(int *client_sockets, int num_clients, int sockfd, char* buffer, size_t bufferSize);
 extern void handleFileCommand(const char* directory, int clientSocket, char* buffer, size_t bufferSize);

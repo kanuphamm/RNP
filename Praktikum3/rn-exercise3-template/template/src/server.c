@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include "cmdHandlerServer.h"
+#include "myHelperFunctions.h"
 
 
 #define MAX_CLIENTS 25 // maximum number of clients
@@ -28,64 +29,11 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-
-void my_recv(char* buf, int sockfd, FILE *stream){
-    int nbytes;
-    int run = 1;
-    char endOfFile = 4;
-
-    //TODO hier wen buff nicht leer erst buff lehren
-    char* eofPointer = strchr(buf, endOfFile);
-    if (eofPointer != NULL) {
-        run = 0;
-        *eofPointer = '\0';
-    }
-    fprintf(stream, "%s", buf);
-    while ( (run == 1) && (nbytes = recv(sockfd, buf, BUFFER_SIZE -1, 0)) > 0  ) {
-        eofPointer = strchr(buf, endOfFile);
-        if (eofPointer != NULL) {
-            run = 0;
-            *eofPointer = '\0';
-        }
-        fprintf(stream, "%s", buf);
-        fflush(stream);
-        memset(buf, 0, BUFFER_SIZE);
-    }
-}
-
-int my_sendEOF(int sockfd){
-    ssize_t bytesSent = 0;
-    char endOfFile = '\4';
-    char* ptrEndOfFile = &endOfFile;
-    bytesSent = send(sockfd, ptrEndOfFile, sizeof(char), 0);
-    if (bytesSent < 0) {
-        perror("Fehler beim Senden endOfLine");
-        return -1;
-    }
-    return bytesSent;
-}
-
-
-void trenneString(char* string, const char* trennzeichen, char** ersterTeil, char** zweiterTeil) {
-    char* teil = strtok(string, trennzeichen);
-    if (teil != NULL) {
-        *ersterTeil = strdup(teil);
-        
-        teil = strtok(NULL, "");
-        if (teil != NULL) {
-            *zweiterTeil = strdup(teil);
-        } else {
-            *zweiterTeil = NULL;
-        }
-    } else {
-        *ersterTeil = NULL;
-        *zweiterTeil = NULL;
-    }
-}
-
-
 int main(void)
 {
+    static const char* verzeichnis = "../../src/storageServer/"; //speicherverzeichnis für empfangende Files
+
+
     fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
     int fdmax;        // maximum file descriptor number
@@ -228,7 +176,7 @@ int main(void)
 
                             // -----------------Command: List    
                             if(tokens[2] != NULL)
-                            {   static const char* verzeichnis = "../../src/storageServer/";                 
+                            {                   
                                 if (strcmp(tokens[2], "List") == 0) {
                                     handleListCommand(client_sockets, num_clients, i,buf, BUFFER_SIZE);
                                 // -----------------Command: Files                            
