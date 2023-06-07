@@ -15,6 +15,14 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+#define SAVE_MODE 1
+#define OVERWRITE_MODE 0
+
+extern int my_sendEOF(int sockfd);
+extern void my_recv(char* buf,size_t bufferSize, int sockfd, FILE *stream, int mode);
+
 extern void trenneString(char* string, const char* trennzeichen, char** ersterTeil, char** zweiterTeil); 
+extern char* getAbsolutePath( char * filepath);
+extern char* get_file_path(const char* absolutePath, const char* filename); 
 
 #endif // MYHELPERFUNCTIONS_H

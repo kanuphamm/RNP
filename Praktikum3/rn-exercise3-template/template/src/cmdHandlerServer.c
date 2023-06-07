@@ -1,47 +1,5 @@
 #include "cmdHandlerServer.h"
 
-int my_sendEOF(int sockfd)
-{
-    ssize_t bytesSent = 0;
-    char endOfFile = '\4';
-    char* ptrEndOfFile = &endOfFile;
-    bytesSent = send(sockfd, ptrEndOfFile, sizeof(char), 0);
-    if (bytesSent < 0) {
-        perror("Fehler beim Senden endOfLine");
-        return -1;
-    }
-    return bytesSent;
-}
-
-
-
-void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream)
-{
-    int nbytes;
-    int run = 1;
-    char endOfFile = 4;
-
-    //TODO hier wen buff nicht leer erst buff lehren
-    char* eofPointer = strchr(buf, endOfFile);
-    if (eofPointer != NULL) {
-        run = 0;
-        *eofPointer = '\0';
-    }
-    fprintf(stream, "%s", buf);
-    while ( (run == 1) && (nbytes = recv(sockfd, buf, bufferSize -1, 0)) > 0  ) {
-        eofPointer = strchr(buf, endOfFile);
-        if (eofPointer != NULL) {
-            run = 0;
-            *eofPointer = '\0';
-        }
-        fprintf(stream, "%s", buf);
-        fflush(stream);
-        memset(buf, 0, bufferSize);
-    }
-}
-
-
-
 void handleListCommand(int *client_sockets, int num_clients, int sockfd, char* buffer, size_t bufferSize)
 {
     int j;
@@ -138,7 +96,7 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
         printf("Failed to open the file.\n");
     }
     fflush(stdout);
-    my_recv(buf, bufferSize, sockfd, file);
+    my_recv(buf, bufferSize, sockfd, file, SAVE_MODE);
     fclose(file);
     free(pathAndFileName);
     fflush(stdout);

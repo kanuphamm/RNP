@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <limits.h>
 #include <sys/socket.h>
+#include "myHelperFunctions.h"
 
+extern int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_stream, size_t bufferSize);
 
 #endif // CMDHANDLERCLIENT_H
