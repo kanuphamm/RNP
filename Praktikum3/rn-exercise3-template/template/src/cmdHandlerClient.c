@@ -1,5 +1,50 @@
 #include "cmdHandlerClient.h"
 
+void handleGetCommand(char* buffer_stream, size_t bufferSize, char* command, char*filename, const char* verzeichnis ,int sockfd){
+    char space[] = " ";
+    char EOT[] = "\4";
+    ssize_t bytesSent = 0;
+    size_t length = strlen(command) + strlen(space) +strlen(filename)+ strlen(EOT)+ 1; //TODO frage +1
+    // Allocate memory for the concatenated string
+    char* concatenated = (char*)malloc(length * sizeof(char));
+    if (concatenated == NULL) {
+        printf("Memory allocation failed.\n");
+    }
+
+    strcpy(concatenated, command);
+    strcat(concatenated, space);
+    strcat(concatenated, filename);
+    strcat(concatenated, EOT);
+
+    //Send Command Put <dateiname>
+    bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
+    if (bytesSent < 0) {
+        perror("Fehler beim Senden");
+    }
+    free(concatenated);
+
+    FILE *file;
+    length = strlen(verzeichnis) + strlen(filename) + 1; 
+    char* pathAndFileName = (char*)malloc(length * sizeof(char));
+    if (pathAndFileName == NULL) {
+        printf("Memory allocation failed.\n");
+        fflush(stdout);
+    }
+    strcpy(pathAndFileName, verzeichnis);
+    strcat(pathAndFileName, filename);
+
+    file = fopen(pathAndFileName, "w");
+    if (file == NULL) {
+        printf("Failed to open the file.\n");
+        fflush(stdout);
+    }
+    
+    my_recv(buffer_stream, bufferSize, sockfd, file, OVERWRITE_MODE);
+    fclose(file);
+    free(pathAndFileName);
+    return;
+}
+
 int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_stream, size_t bufferSize)
 {
     FILE* file;

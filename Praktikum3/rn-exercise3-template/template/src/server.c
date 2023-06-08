@@ -164,17 +164,17 @@ int main(void)
                             strcpy(originalString, buf); // Den ursprünglichen String kopieren
                             trenneString(originalString, "\4", &tokens[0], &tokens[1]);  
                             trenneString(tokens[0], " ", &tokens[2], &tokens[3]);                 
-                                                                 // Beispiel:
+ /*                                                                // Beispiel:
                             printf("Token 0: <%s>\n", tokens[0]);// Commando +\4+ Dateiname
                             printf("Token 1: <%s>\n", tokens[1]);// optional File Inhalt eventuel auch \4 NULL wen nicht mit drinn
                             printf("Token 2: <%s>\n", tokens[2]);// Put
                             printf("Token 3: <%s>\n", tokens[3]);// dateiname
                             fflush(stdout);
-
+*/
                             if(tokens[1] != NULL){
                                 strncpy(buf, tokens[1], BUFFER_SIZE - 1);
                                 buf[BUFFER_SIZE - 1] = '\0';  // Stelle sicher, dass der Buffer ordnungsgemäß abgeschlossen ist
-                                printf("Kopierter String (Token[1]->buf): %s\n", buf);
+//                                printf("Kopierter String (Token[1]->buf): %s\n", buf);
                             }else{
                                 memset(buf, 0, BUFFER_SIZE);
                             }
@@ -206,7 +206,7 @@ int main(void)
                                         // Datei zeilenweise lesen und an den Server senden
                                         while (fgets(buf, BUFFER_SIZE, file) != NULL) {
                                             bytesSent = send(i, buf, strlen(buf), 0);
-                                            printf("Send: %s",buf);
+//                                            printf("Send: %s",buf);
                                             if (bytesSent < 0) {
                                                 perror("Fehler beim Senden der Daten");
                                             }
@@ -230,7 +230,7 @@ int main(void)
                     } else {
                         if (nbytes == 0) {
                             // connection closed
-                            printf("nbytes %d\n", nbytes);
+                            printf("\nnbytes %d\n", nbytes);
                             printf("Client disconnected on socket %d.\n", i);
                         } else {
                             perror("recv");

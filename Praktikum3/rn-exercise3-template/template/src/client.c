@@ -33,9 +33,9 @@ int main(int argc, char *argv[])
 {
     static const char* verzeichnis = "../../src/storageClient/"; //speicherverzeichnis für Files
 
-    printf("<argc: %d\n>",argc);
+    printf("<argc: %d>\n",argc);
     for(int i = 0; i< argc; i++){
-        printf("<argv[%d]: %s\n>",i,argv[i]);
+        printf("<argv[%d]: %s>\n",i,argv[i]);
     }
     
     const char *restrict SRV_ADDRESS = argv[1]; // TODO: Remove cast and parse arguments.
@@ -95,7 +95,6 @@ int main(int argc, char *argv[])
     freeaddrinfo(servinfo); // all done with this structure
 
     printf("Connected to the server.\n");
-    printf("Enter commands ('Quit' to exit):\n");
 
     char buffer[MAX_BUFFER_SIZE];
     char buffer_stream[MAX_BUFFER_SIZE];
@@ -118,7 +117,7 @@ int main(int argc, char *argv[])
             tokens[numTokens] = malloc(strlen(token) + 1);  // Speicher für das Token reservieren
             strcpy(tokens[numTokens], token);
             tokens[numTokens][strcspn(tokens[numTokens], "\n")] = '\0';
-            printf("Token[%d]<%s>\n",numTokens, tokens[numTokens]);
+//            printf("Token[%d]<%s>\n",numTokens, tokens[numTokens]);
 
             token = strtok(NULL, delimiter);
             numTokens++;
@@ -136,47 +135,7 @@ int main(int argc, char *argv[])
             my_recv(buffer_stream, MAX_BUFFER_SIZE, sockfd, stdout, OVERWRITE_MODE);
         }
         else if(strcmp(tokens[0], "Get") == 0){
-            char space[] = " ";
-            char EOT[] = "\4";
-            size_t length = strlen(tokens[0]) + strlen(space) +strlen(tokens[1])+ strlen(EOT)+ 1; //TODO frage +1
-            // Allocate memory for the concatenated string
-            char* concatenated = (char*)malloc(length * sizeof(char));
-            if (concatenated == NULL) {
-                printf("Memory allocation failed.\n");
-            }
-
-            strcpy(concatenated, tokens[0]);
-            strcat(concatenated, space);
-            strcat(concatenated, tokens[1]);
-            strcat(concatenated, EOT);
-
-            //Send Command Put <dateiname>
-            bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
-            if (bytesSent < 0) {
-                perror("Fehler beim Senden");
-            }
-            free(concatenated);
-
-            FILE *file;
-            length = strlen(verzeichnis) + strlen(tokens[1]) + 1; 
-            char* pathAndFileName = (char*)malloc(length * sizeof(char));
-            if (pathAndFileName == NULL) {
-                printf("Memory allocation failed.\n");
-                fflush(stdout);
-            }
-            strcpy(pathAndFileName, verzeichnis);
-            strcat(pathAndFileName, tokens[1]);
-
-            file = fopen(pathAndFileName, "w");
-            if (file == NULL) {
-                printf("Failed to open the file.\n");
-                fflush(stdout);
-            }
-            
-            my_recv(buffer_stream, MAX_BUFFER_SIZE, sockfd, file, OVERWRITE_MODE);
-            fclose(file);
-            free(pathAndFileName);
-
+            handleGetCommand(buffer_stream, MAX_BUFFER_SIZE, tokens[0], tokens[1], verzeichnis , sockfd);
         }
         else if(strcmp(tokens[0], "Put") == 0 && numTokens == 2) {
             handlePutCommand( tokens[1], tokens[0], sockfd, buffer_stream, MAX_BUFFER_SIZE);
@@ -195,9 +154,6 @@ int main(int argc, char *argv[])
         buffer[strcspn(buffer, "\n")] = '\0';
 
     }//end While
-
-    printf("\nEnter commands ('Quit' to exit):\n");
-
 
     close(sockfd);
 
