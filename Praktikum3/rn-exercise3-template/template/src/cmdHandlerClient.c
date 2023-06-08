@@ -16,7 +16,7 @@ void handleGetCommand(char* buffer_stream, size_t bufferSize, char* command, cha
     strcat(concatenated, filename);
     strcat(concatenated, EOT);
 
-    //Send Command Put <dateiname>
+    //Send Command z.b. Put <dateiname>
     bytesSent = send(sockfd, concatenated, strlen(concatenated), 0);
     if (bytesSent < 0) {
         perror("Fehler beim Senden");
@@ -98,7 +98,7 @@ int handlePutCommand(char*filename,char* command, int sockfd, char* buffer_strea
         // Datei zeilenweise lesen und an den Server senden
         while (fgets(buffer_stream, bufferSize, file) != NULL) {
             bytesSent = send(sockfd, buffer_stream, strlen(buffer_stream), 0);
-            printf("Send: %s",buffer_stream);
+//            printf("Send: %s",buffer_stream);
             if (bytesSent < 0) {
                 perror("Fehler beim Senden der Daten");
             }

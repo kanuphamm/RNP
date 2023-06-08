@@ -1,5 +1,33 @@
 #include "cmdHandlerServer.h"
 
+void handleGetCommand(int sockfd,char* buffer, size_t bufferSize, char* filename){
+    FILE* file;
+    ssize_t bytesSent = 0;
+                  
+    char* absolutePath = getAbsolutePath("../../src/storageServer");
+    char* filePath = get_file_path(absolutePath, filename);
+
+    file = fopen(filePath, "r");
+    if (file == NULL) {
+        perror("Fehler beim Öffnen der Datei ");
+        free(absolutePath);
+        free(filePath);
+    }else{
+
+        while (fgets(buffer, bufferSize, file) != NULL) {
+            bytesSent = send(sockfd, buffer, strlen(buffer), 0);
+//          printf("Send: %s",buf);
+            if (bytesSent < 0) {
+                perror("Fehler beim Senden der Daten");
+            }
+        }
+        my_sendEOF(sockfd);
+        free(absolutePath);
+        free(filePath);
+        fclose(file);
+    }
+}
+
 void handleListCommand(int *client_sockets, int num_clients, int sockfd, char* buffer, size_t bufferSize)
 {
     int j;
@@ -115,7 +143,7 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
 
     char message[512];
 
-    snprintf(message, sizeof(message), "OK %s\n%s\n%s\n\4", serverHost, serverIP, timeString);
+    snprintf(message, sizeof(message), "OK Serverhostname: %s\nServer-IP-Adresse: %s\nDatum + Uhrzeit: %s\n\4", serverHost, serverIP, timeString);
     send(sockfd, message, sizeof(message), 0);
     //my_sendEOF(i); // in snprinf jetzt zu finden
     fflush(stdout);

@@ -153,7 +153,7 @@ int main(void)
                     // -----------------handle data from a client
                     memset(buf, 0, BUFFER_SIZE);
                     if ((nbytes = recv(i, buf, BUFFER_SIZE -1, 0)) > 0) {//-1 ensures that there is space left for a null terminator at the end of the received data.
-                        printf("Message received: <%s>\n", buf);
+//                        printf("Message received: <%s>\n", buf);
                                                    
                             // got error or connection closed by client
                             
@@ -164,13 +164,13 @@ int main(void)
                             strcpy(originalString, buf); // Den ursprünglichen String kopieren
                             trenneString(originalString, "\4", &tokens[0], &tokens[1]);  
                             trenneString(tokens[0], " ", &tokens[2], &tokens[3]);                 
- /*                                                                // Beispiel:
-                            printf("Token 0: <%s>\n", tokens[0]);// Commando +\4+ Dateiname
-                            printf("Token 1: <%s>\n", tokens[1]);// optional File Inhalt eventuel auch \4 NULL wen nicht mit drinn
-                            printf("Token 2: <%s>\n", tokens[2]);// Put
-                            printf("Token 3: <%s>\n", tokens[3]);// dateiname
+                                                                 // Beispiel:
+//                            printf("Token 0: <%s>\n", tokens[0]);// Commando +\4+ Dateiname
+//                            printf("Token 1: <%s>\n", tokens[1]);// optional File Inhalt eventuel auch \4 NULL wen nicht mit drinn
+                            printf("Token 2 (Command): <%s>\n", tokens[2]);// Put
+                            printf("Token 3 (Dateiname): <%s>\n", tokens[3]);// dateiname
                             fflush(stdout);
-*/
+
                             if(tokens[1] != NULL){
                                 strncpy(buf, tokens[1], BUFFER_SIZE - 1);
                                 buf[BUFFER_SIZE - 1] = '\0';  // Stelle sicher, dass der Buffer ordnungsgemäß abgeschlossen ist
@@ -188,35 +188,7 @@ int main(void)
                                 } else if (strcmp(tokens[2], "Files") == 0) {
                                     handleFileCommand(verzeichnis, i, buf, BUFFER_SIZE); // i ist der clientSocket
                                 } else if (strcmp(tokens[2], "Get") == 0) {
-                                    FILE* file;
-                                    ssize_t bytesSent = 0;
-                                    // Datei öffnen                    
-                                    char* absolutePath = getAbsolutePath("../../src/storageServer");
-                                    //printf("\nabsolutePath: %s\n",absolutePath);
-                                    //substring points to beginning of "Put "
-                                    char* filePath = get_file_path(absolutePath, tokens[3]);
-                                    //printf("filePath: %s\n",filePath);
-
-                                    file = fopen(filePath, "r");
-                                    if (file == NULL) {
-                                        perror("Fehler beim Öffnen der Datei ");
-                                        free(absolutePath);
-                                        free(filePath);
-                                    }else{
-                                        // Datei zeilenweise lesen und an den Server senden
-                                        while (fgets(buf, BUFFER_SIZE, file) != NULL) {
-                                            bytesSent = send(i, buf, strlen(buf), 0);
-//                                            printf("Send: %s",buf);
-                                            if (bytesSent < 0) {
-                                                perror("Fehler beim Senden der Daten");
-                                            }
-                                        }
-                                        my_sendEOF(i);
-                                        free(absolutePath);
-                                        free(filePath);
-                                        fclose(file);
-                                    }
-
+                                handleGetCommand(i, buf, BUFFER_SIZE, tokens[3]);
                                 // -----------------Command: Put                            
                                 } else if (strcmp(tokens[2], "Put") == 0) {
                                     handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis);

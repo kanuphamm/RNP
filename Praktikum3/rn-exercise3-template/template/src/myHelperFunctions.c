@@ -134,6 +134,5 @@ char* get_file_path(const char* absolutePath, const char* filename)
 
     // Concatenate the absolute path and filename
     snprintf(filePath, bufferSize + 1, "%s%s", absolutePath, filename);
-    printf("filepath: %s\n", filePath);
     return filePath;
 }
