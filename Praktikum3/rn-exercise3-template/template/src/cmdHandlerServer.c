@@ -13,6 +13,8 @@ void handleGetCommand(int sockfd,char* buffer, size_t bufferSize, char* filename
         free(absolutePath);
         free(filePath);
     }else{
+        //send<Datei-Attribute: last modified, size>
+        send(sockfd, buffer, strlen(buffer), 0);
 
         while (fgets(buffer, bufferSize, file) != NULL) {
             bytesSent = send(sockfd, buffer, strlen(buffer), 0);
@@ -80,7 +82,7 @@ void handleFileCommand(const char* directory, int clientSocket, char* buffer, si
             // Nur reguläre Dateien berücksichtigen
             if (S_ISREG(attrib.st_mode)) {
                 // Dateiname und Attribute in eine Zeichenkette formatieren
-                sprintf(buffer, "%s\tLast Modified: %s\tSize: %lld bytes\n",
+                sprintf(buffer, "Datei-Attribute: %s\tLast Modified, %s\tSize, %lld bytes\n",
                         entry->d_name,
                         ctime(&attrib.st_mtime),
                         (long long)attrib.st_size);

@@ -38,8 +38,8 @@ void handleGetCommand(char* buffer_stream, size_t bufferSize, char* command, cha
         printf("Failed to open the file.\n");
         fflush(stdout);
     }
-    
-    my_recv(buffer_stream, bufferSize, sockfd, file, OVERWRITE_MODE);
+    //my_recv(buffer_stream, bufferSize, sockfd, stdout, OVERWRITE_MODE);  TODO    das hier einkommentieren
+    my_recv(buffer_stream, bufferSize, sockfd, file, SAVE_MODE);
     fclose(file);
     free(pathAndFileName);
     return;
