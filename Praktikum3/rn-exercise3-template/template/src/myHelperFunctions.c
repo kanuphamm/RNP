@@ -30,8 +30,6 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
             int index = eofPointer - buf;
             fprintf(stream,"%.*s\n", index+1, buf);
             fflush(stream);
-            fprintf(stdout,"Oben1:<%.*s>\n", index+1, buf);
-            fflush(stdout);
             
             memmove(temp_buffer, buf + index + 1, bufferSize-1 - index);
             memset(buf, 0, bufferSize);
@@ -40,8 +38,6 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
         }else{
             fprintf(stream, "%s", buf);
             fflush(stream);
-            printf("Oben2<%s>\n",buf);
-            fflush(stdout);
             memset(buf, 0, bufferSize);
         }
         
@@ -55,8 +51,6 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
                 int index = eofPointer - buf;
                 fprintf(stream,"%.*s\n", index+1, buf);
                 fflush(stream);
-                fprintf(stdout,"Unten1:<%.*s>\n", index+1, buf);
-                fflush(stdout);
                 memmove(temp_buffer, buf + index + 1, bufferSize-1 - index);
                 memset(buf, 0, bufferSize);
                 memmove(buf, temp_buffer, bufferSize);
@@ -65,8 +59,6 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
             }
             fprintf(stream, "%s", buf);
             fflush(stream);
-            printf("Unten2<%s>\n",buf);
-            fflush(stdout);
             memset(buf, 0, bufferSize);
         }
     }
