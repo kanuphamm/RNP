@@ -215,3 +215,61 @@ int handlePutCommand(struct sockaddr_storage remoteaddr, socklen_t addrlen, char
     fflush(stdout);
     return 1;
 }
+
+int handlePutCommandHost(struct sockaddr_storage remoteaddr, socklen_t addrlen, char* buf, size_t bufferSize, int sockfd, const  char* filename, const char* verzeichnis, char* ip)
+{
+    FILE *file;
+    size_t length = strlen(verzeichnis) + strlen(filename) + 1;
+    char* pathAndFileName = (char*)malloc(length * sizeof(char));
+    if (pathAndFileName == NULL) {
+        printf("Memory allocation failed.\n");
+        fflush(stdout);
+    }
+    strcpy(pathAndFileName, verzeichnis);
+    strcat(pathAndFileName, filename);
+
+    file = fopen(pathAndFileName, "w");
+    if (file == NULL) {
+        printf("Failed to open the file.\n");
+        fflush(stdout);
+    }
+
+    my_recv(buf, bufferSize, sockfd, file, SAVE_MODE);
+    fclose(file);
+    free(pathAndFileName);
+
+    //Print Meta Data
+    time_t currentTime;
+    struct tm *timeInfo;
+    char timeString[20];
+    time(&currentTime);
+    timeInfo = localtime(&currentTime);
+    strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", timeInfo);
+
+    char serverHost[NI_MAXHOST];
+    char serverPort[NI_MAXHOST];
+    getnameinfo((struct sockaddr *)&remoteaddr, addrlen, serverHost, NI_MAXHOST, serverPort, NI_MAXHOST, NI_NUMERICHOST);
+
+    char message[512];
+
+    struct sockaddr_in* sa = (struct sockaddr_in*)&remoteaddr;
+    char serverIPP[INET_ADDRSTRLEN];
+
+    inet_ntop(AF_INET, &(sa->sin_addr), serverIPP, INET_ADDRSTRLEN);
+
+    printf("Server-IP-Adresse: %s\n", serverIPP);
+    char hostname[256];
+    if (gethostname(hostname, bufferSize) == 0) {
+        printf("host name %s", hostname);
+    } else {
+        perror("gethostname");
+        return -1; // Fehler
+    }
+
+    snprintf(message, sizeof(message), "OK %s\n%s\n%s\n\4", hostname, serverHost, timeString);
+    //snprintf(message, sizeof(message), "OK %s\n%s\n%s\n\4", serverHost, ip, timeString);
+    send(sockfd, message, sizeof(message), 0);
+    //my_sendEOF(i); // in snprinf jetzt zu finden
+    fflush(stdout);
+    return 1;
+}
