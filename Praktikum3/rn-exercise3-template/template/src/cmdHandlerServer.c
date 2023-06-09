@@ -49,7 +49,7 @@ void handleListCommand(int *client_sockets, int num_clients, int sockfd, char* b
         char clientPort[NI_MAXSERV];
 
         // IP-Adresse und Hostname abrufen
-        int result = getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
+        int result = getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, 0/*NI_NUMERICHOST | NI_NUMERICSERV*/);
 
         if (result == 0) {
             // Hostname erfolgreich abgerufen

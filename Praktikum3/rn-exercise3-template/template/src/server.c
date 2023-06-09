@@ -188,8 +188,8 @@ int main(void)
                                 handleGetCommand(i, buf, BUFFER_SIZE, tokens[3],verzeichnis);
 // -----------------Command: Put                            
                                 } else if (strcmp(tokens[2], "Put") == 0) {
-                                    handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
-                                    //handlePutCommandHost(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
+                                    //handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
+                                    handlePutCommandHost(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
                                 }
                             }
                             // Speicher für Tokens freigeben
