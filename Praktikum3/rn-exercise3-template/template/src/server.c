@@ -37,7 +37,7 @@ void *get_in_addr(struct sockaddr *sa)
 int main(void)
 {
     static const char* verzeichnis = "../../src/storageServer/"; //speicherverzeichnis für Files
-
+    static const char* verzeichnisClient = "../../src/storageClient/";
 
     fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
@@ -150,7 +150,7 @@ int main(void)
                             newfd);
                     }
                 } else {
-                    // -----------------handle data from a client
+// -----------------handle data from a client
                     memset(buf, 0, BUFFER_SIZE);
                     if ((nbytes = recv(i, buf, BUFFER_SIZE -1, 0)) > 0) {//-1 ensures that there is space left for a null terminator at the end of the received data.
 //                        printf("Message received: <%s>\n", buf);
@@ -165,8 +165,8 @@ int main(void)
                             trenneString(originalString, "\4", &tokens[0], &tokens[1]);  
                             trenneString(tokens[0], " ", &tokens[2], &tokens[3]);                 
                                                                  // Beispiel:
-//                            printf("Token 0: <%s>\n", tokens[0]);// Commando +\4+ Dateiname
-//                            printf("Token 1: <%s>\n", tokens[1]);// optional File Inhalt eventuel auch \4 NULL wen nicht mit drinn
+//                          printf("Token 0: <%s>\n", tokens[0]);// Commando +\4+ Dateiname
+//                          printf("Token 1: <%s>\n", tokens[1]);// optional File Inhalt eventuel auch \4 NULL wen nicht mit drinn
                             printf("Token 2 (Command): <%s>\n", tokens[2]);// Put
                             printf("Token 3 (Dateiname): <%s>\n", tokens[3]);// dateiname
                             fflush(stdout);
@@ -174,24 +174,26 @@ int main(void)
                             if(tokens[1] != NULL){
                                 strncpy(buf, tokens[1], BUFFER_SIZE - 1);
                                 buf[BUFFER_SIZE - 1] = '\0';  // Stelle sicher, dass der Buffer ordnungsgemäß abgeschlossen ist
-//                                printf("Kopierter String (Token[1]->buf): %s\n", buf);
+//                              printf("Kopierter String (Token[1]->buf): %s\n", buf);
                             }else{
                                 memset(buf, 0, BUFFER_SIZE);
                             }
-
-                            // -----------------Command: List    
+// -----------------Command: List    
                             if(tokens[2] != NULL)
                             {                   
                                 if (strcmp(tokens[2], "List") == 0) {
                                     handleListCommand(client_sockets, num_clients, i,buf, BUFFER_SIZE);
-                                // -----------------Command: Files                            
+// -----------------Command: Files                            
                                 } else if (strcmp(tokens[2], "Files") == 0) {
                                     handleFileCommand(verzeichnis, i, buf, BUFFER_SIZE); // i ist der clientSocket
+// -----------------Command: Get                                       
                                 } else if (strcmp(tokens[2], "Get") == 0) {
+                                //TODO Wir springen hier nicht rein
+                                getCommandAnswer(verzeichnis, tokens[3], i, buf, BUFFER_SIZE);
                                 handleGetCommand(i, buf, BUFFER_SIZE, tokens[3]);
-                                // -----------------Command: Put                            
+// -----------------Command: Put                            
                                 } else if (strcmp(tokens[2], "Put") == 0) {
-                                    handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis);
+                                    handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
                                 }
                             }
                             // Speicher für Tokens freigeben

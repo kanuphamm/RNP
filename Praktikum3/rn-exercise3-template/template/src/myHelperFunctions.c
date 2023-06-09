@@ -18,6 +18,7 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
 {
     if(mode == SAVE_MODE)
     {
+        #define PRINT_LINE_FILE printf("Zeile: %d, Datei: %s\n", __LINE__, __FILE__)
         int nbytes;
         int run = 1;
         char endOfFile = 4;
