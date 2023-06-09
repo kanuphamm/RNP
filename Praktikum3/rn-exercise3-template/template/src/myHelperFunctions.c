@@ -26,6 +26,11 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
             run = 0;
             *eofPointer = '\0';
             printf("%s", buf);
+            fflush(stream);
+            int index = eofPointer - buf;
+            printf("Substring: %.*s\n", index, buf);
+            fflush(stdout);
+            memmove(buf, buf + index + 1, bufferSize-1 - index);
         }
         fprintf(stream, "%s", buf);
         while ( (run == 1) && (nbytes = recv(sockfd, buf, bufferSize -1, 0)) > 0  ) {
@@ -35,10 +40,23 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
                 *eofPointer = '\0';
                 fprintf(stream, "%s", buf);
                 fflush(stream);
+                eofPointer++;
+
                 
+                // Index des gefundenen Zeichens ermitteln
+                int index = eofPointer - buf;
+                
+                // Substring am Anfang des Buffers ausgeben
+                printf("Substring: %.*s\n", index, buf);
+                fflush(stdout);
+                
+                // Restlichen String an den Anfang des Buffers verschieben
+                memmove(buf, buf + index + 1, bufferSize-1 - index);
                 break;
             }
             fprintf(stream, "%s", buf);
+            fprintf(stdout, "%s", buf);
+            fflush(stdout);
             fflush(stream);
             memset(buf, 0, bufferSize);
         }

@@ -38,8 +38,15 @@ void handleGetCommand(char* buffer_stream, size_t bufferSize, char* command, cha
         printf("Failed to open the file.\n");
         fflush(stdout);
     }
-    my_recv(buffer_stream, bufferSize, sockfd, stdout, OVERWRITE_MODE); 
-    my_recv(buffer_stream, bufferSize, sockfd, file, OVERWRITE_MODE);
+    printf("hier1\n");
+    fflush(stdout);
+    memset(buffer_stream, 0, bufferSize);
+    my_recv(buffer_stream, bufferSize, sockfd, stdout, SAVE_MODE); 
+    printf("hier2\n");
+    fflush(stdout);
+    my_recv(buffer_stream, bufferSize, sockfd, file, SAVE_MODE);
+    printf("hier3\n");
+    fflush(stdout);
     fclose(file);
     free(pathAndFileName);
     return;

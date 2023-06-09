@@ -7,18 +7,19 @@ void handleGetCommand(int sockfd,char* buffer, size_t bufferSize, char* filename
     char* absolutePath = getAbsolutePath("../../src/storageServer");
     char* filePath = get_file_path(absolutePath, filename);
 
+    getCommandAnswer(verzeichnis, filename, sockfd, buffer, bufferSize);
+    
     file = fopen(filePath, "r");
     if (file == NULL) {
         perror("Fehler beim Öffnen der Datei ");
         free(absolutePath);
         free(filePath);
     }else{
-        getCommandAnswer(verzeichnis, filename, sockfd, buffer, bufferSize);
-
         memset(buffer, 0, bufferSize);
         while (fgets(buffer, bufferSize, file) != NULL) {
             bytesSent = send(sockfd, buffer, strlen(buffer), 0);      
-//          printf("Send: %s",buf);
+            printf("Send: %s",buffer);
+            fflush(stdout);
             if (bytesSent < 0) {
                 perror("Fehler beim Senden der Daten");
             }
