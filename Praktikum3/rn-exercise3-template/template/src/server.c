@@ -24,10 +24,8 @@ void *get_in_addr(struct sockaddr *sa)
 {
     printf("connet detected!\n");
     if (sa->sa_family == AF_INET) {
-        printf("IPv4 detected!\n");
         return &(((struct sockaddr_in*)sa)->sin_addr);
     } else if (sa->sa_family == AF_INET6) {
-        printf("IPv6 detected!\n");
         return &(((struct sockaddr_in6*)sa)->sin6_addr);
     }
 
@@ -190,8 +188,8 @@ int main(void)
                                 handleGetCommand(i, buf, BUFFER_SIZE, tokens[3],verzeichnis);
 // -----------------Command: Put                            
                                 } else if (strcmp(tokens[2], "Put") == 0) {
-                                    //handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
-                                    handlePutCommandHost(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
+                                    handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
+                                    //handlePutCommandHost(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);
                                 }
                             }
                             // Speicher für Tokens freigeben
