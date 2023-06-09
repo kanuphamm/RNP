@@ -49,11 +49,11 @@ void handleListCommand(int *client_sockets, int num_clients, int sockfd, char* b
         char clientPort[NI_MAXSERV];
 
         // IP-Adresse und Hostname abrufen
-        int result = getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, 0);
+        int result = getnameinfo((struct sockaddr *)&clientAddr, addrLen, clientHost, NI_MAXHOST, clientPort, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
         if (result == 0) {
             // Hostname erfolgreich abgerufen
-            printf("Client %d: %s:%s\n", j+1, clientHost, clientPort);
+            //printf("Client %d: %s:%s\n", j+1, clientHost, clientPort);
         } else {
             // Fehler beim Abrufen des Hostnamens
             printf("Fehler beim Abrufen des Hostnamens für Client %d: %s\n", j+1, gai_strerror(result));
@@ -64,11 +64,10 @@ void handleListCommand(int *client_sockets, int num_clients, int sockfd, char* b
     }
 
     // Die Anzahl der verbundenen Clients zur Nachricht hinzufügen
-    messageLength += snprintf(buffer + messageLength, bufferSize - messageLength, "%d Clients connected\n", num_clients);
+    messageLength += snprintf(buffer + messageLength, bufferSize - messageLength, "%d Clients connected\n\4", num_clients);
 
     // Die Nachricht an den gewünschten Socket senden
     send(sockfd, buffer, messageLength, 0);
-    my_sendEOF(sockfd);
 }
 
 
