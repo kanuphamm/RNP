@@ -45,6 +45,7 @@ void handleGetCommand(char* buffer_stream, size_t bufferSize, char* command, cha
     printf("hier2\n");
     fflush(stdout);
     my_recv(buffer_stream, bufferSize, sockfd, file, SAVE_MODE);
+    memset(buffer_stream, 0, bufferSize);
     printf("hier3\n");
     fflush(stdout);
     fclose(file);
