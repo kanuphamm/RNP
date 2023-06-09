@@ -18,7 +18,7 @@ void handleGetCommand(int sockfd,char* buffer, size_t bufferSize, char* filename
         memset(buffer, 0, bufferSize);
         while (fgets(buffer, bufferSize, file) != NULL) {
             bytesSent = send(sockfd, buffer, strlen(buffer), 0);      
-            printf("Send: %s",buffer);
+            printf("Send: <%s>",buffer);
             fflush(stdout);
             if (bytesSent < 0) {
                 perror("Fehler beim Senden der Daten");
@@ -162,7 +162,6 @@ void getCommandAnswer(const char* directory, const char* filename, int clientSoc
         printf("Fehler beim Öffnen des Verzeichnisses\n");
     }
     fflush(stdout);
-    my_sendEOF(clientSocket);
     return;
 }
 

@@ -18,6 +18,7 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
 {
     if(mode == SAVE_MODE)
     {
+        char* temp_buffer[bufferSize];
         int nbytes;
         int run = 1;
         char endOfFile = 4;
@@ -25,39 +26,47 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
         if (eofPointer != NULL) {
             run = 0;
             *eofPointer = '\0';
-            printf("%s", buf);
-            fflush(stream);
 
             int index = eofPointer - buf;
-            fprintf(stream,"%.*s\n", index, buf);
+            fprintf(stream,"%.*s\n", index+1, buf);
+            fflush(stream);
+            fprintf(stdout,"Oben1:<%.*s>\n", index+1, buf);
             fflush(stdout);
-            memset(buf, 0, index);
-            memmove(buf, buf + index + 1, bufferSize-1 - index);
+            
+            memmove(temp_buffer, buf + index + 1, bufferSize-1 - index);
+            memset(buf, 0, bufferSize);
+            memmove(buf, temp_buffer, bufferSize);
+            memset(temp_buffer, 0, bufferSize);
+        }else{
+            fprintf(stream, "%s", buf);
+            fflush(stream);
+            printf("Oben2<%s>\n",buf);
+            fflush(stdout);
+            memset(buf, 0, bufferSize);
         }
-        fprintf(stream, "%s", buf);
-        fprintf(stdout, "%s", buf);
-        fflush(stdout);
-        fflush(stream);
+        
         while ( (run == 1) && (nbytes = recv(sockfd, buf, bufferSize -1, 0)) > 0  ) {
             eofPointer = strchr(buf, endOfFile);
             if (eofPointer != NULL) {
                 run = 0;
                 *eofPointer = '\0';
-                fprintf(stream, "%s", buf);
-                fflush(stream);
-                eofPointer++;
+                
 
                 int index = eofPointer - buf;
-                printf("Substring2: %.*s\n", index, buf);
+                fprintf(stream,"%.*s\n", index+1, buf);
+                fflush(stream);
+                fprintf(stdout,"Unten1:<%.*s>\n", index+1, buf);
                 fflush(stdout);
-                memset(buf, 0, index);
-                memmove(buf, buf + index + 1, bufferSize-1 - index);
+                memmove(temp_buffer, buf + index + 1, bufferSize-1 - index);
+                memset(buf, 0, bufferSize);
+                memmove(buf, temp_buffer, bufferSize);
+                memset(temp_buffer, 0, bufferSize);
                 break;
             }
             fprintf(stream, "%s", buf);
-            fprintf(stdout, "%s", buf);
-            fflush(stdout);
             fflush(stream);
+            printf("Unten2<%s>\n",buf);
+            fflush(stdout);
             memset(buf, 0, bufferSize);
         }
     }

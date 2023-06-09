@@ -135,7 +135,9 @@ int main(int argc, char *argv[])
             my_recv(buffer_stream, MAX_BUFFER_SIZE, sockfd, stdout, OVERWRITE_MODE);
         }
         else if(strcmp(tokens[0], "Get") == 0 && numTokens == 2){
+            memset(buffer_stream, 0, MAX_BUFFER_SIZE);
             handleGetCommand(buffer_stream, MAX_BUFFER_SIZE, tokens[0], tokens[1], verzeichnis , sockfd);
+            memset(buffer_stream, 0, MAX_BUFFER_SIZE);
         }
         else if(strcmp(tokens[0], "Put") == 0 && numTokens == 2) {
             handlePutCommand( tokens[1], tokens[0], sockfd, buffer_stream, MAX_BUFFER_SIZE);
