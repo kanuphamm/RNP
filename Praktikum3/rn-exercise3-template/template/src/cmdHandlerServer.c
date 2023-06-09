@@ -1,11 +1,6 @@
 #include "cmdHandlerServer.h"
 
-
-
-
-
-
-void handleGetCommand(int sockfd,char* buffer, size_t bufferSize, char* filename){
+void handleGetCommand(int sockfd,char* buffer, size_t bufferSize, char* filename, const char* verzeichnis){
     FILE* file;
     ssize_t bytesSent = 0;
                   
@@ -18,15 +13,16 @@ void handleGetCommand(int sockfd,char* buffer, size_t bufferSize, char* filename
         free(absolutePath);
         free(filePath);
     }else{
-        //send<Datei-Attribute: last modified, size>
-        send(sockfd, buffer, strlen(buffer), 0);
+        getCommandAnswer(verzeichnis, filename, sockfd, buffer, bufferSize);
 
+        memset(buffer, 0, bufferSize);
         while (fgets(buffer, bufferSize, file) != NULL) {
-            bytesSent = send(sockfd, buffer, strlen(buffer), 0);
+            bytesSent = send(sockfd, buffer, strlen(buffer), 0);      
 //          printf("Send: %s",buf);
             if (bytesSent < 0) {
                 perror("Fehler beim Senden der Daten");
             }
+            memset(buffer, 0, bufferSize);
         }
         my_sendEOF(sockfd);
         free(absolutePath);
@@ -97,7 +93,7 @@ void handleFileCommand(const char* directory, int clientSocket, char* buffer, si
             // Nur reguläre Dateien berücksichtigen
             if (S_ISREG(attrib.st_mode)) {
                 // Dateiname und Attribute in eine Zeichenkette formatieren
-                sprintf(buffer, "Datei-Attribute: %s\tLast Modified, %s\tSize, %lld bytes\n",
+                sprintf(buffer, "%s Datei-Attribute:\tLast Modified, %s\tSize, %lld bytes\n",
                         entry->d_name,
                         ctime(&attrib.st_mtime),
                         (long long)attrib.st_size);
@@ -123,7 +119,6 @@ void handleFileCommand(const char* directory, int clientSocket, char* buffer, si
 }
 
 void getCommandAnswer(const char* directory, const char* filename, int clientSocket, char* buffer, size_t bufferSize) {
-    PRINT_LINE_FILE;
     DIR* dir;
     struct dirent* entry;
     struct stat attrib;
@@ -136,14 +131,14 @@ void getCommandAnswer(const char* directory, const char* filename, int clientSoc
         while ((entry = readdir(dir)) != NULL) {
             // Den vollen Pfad zum Eintrag erstellen
             char pfad[bufferSize];
-            sprintf(pfad, "%s/%s", directory, entry->d_name);
+            sprintf(pfad, "%s%s", directory, entry->d_name);
             // Dateiattribute abrufen
             stat(pfad, &attrib);
 
             // Nur reguläre Dateien berücksichtigen und nach dem gewünschten Dateinamen suchen
             if (S_ISREG(attrib.st_mode) && strcmp(entry->d_name, filename) == 0) {
                 // Dateiattribute in eine Zeichenkette formatieren
-                sprintf(buffer, "Datei-Attribute: Last Modified - %s, Size - %lld bytes\n",
+                sprintf(buffer, "Datei-Attribute: Last Modified - %s, Size - %lld bytes\n\4",
                         ctime(&attrib.st_mtime),
                         (long long)attrib.st_size);
 
@@ -156,7 +151,7 @@ void getCommandAnswer(const char* directory, const char* filename, int clientSoc
         }
         if (cntDatein == 0) {
             // Datei nicht gefunden
-            sprintf(buffer, "Datei '%s' nicht gefunden\n", filename);
+            sprintf(buffer, "Datei '%s' nicht gefunden\n\4", filename);
             send(clientSocket, buffer, strlen(buffer), 0);
             memset(buffer, 0, bufferSize);
         }

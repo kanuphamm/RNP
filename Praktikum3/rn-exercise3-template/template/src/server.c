@@ -37,7 +37,6 @@ void *get_in_addr(struct sockaddr *sa)
 int main(void)
 {
     static const char* verzeichnis = "../../src/storageServer/"; //speicherverzeichnis für Files
-    static const char* verzeichnisClient = "../../src/storageClient/";
 
     fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
@@ -188,9 +187,7 @@ int main(void)
                                     handleFileCommand(verzeichnis, i, buf, BUFFER_SIZE); // i ist der clientSocket
 // -----------------Command: Get                                       
                                 } else if (strcmp(tokens[2], "Get") == 0) {
-                                //TODO Wir springen hier nicht rein
-                                getCommandAnswer(verzeichnis, tokens[3], i, buf, BUFFER_SIZE);
-                                handleGetCommand(i, buf, BUFFER_SIZE, tokens[3]);
+                                handleGetCommand(i, buf, BUFFER_SIZE, tokens[3],verzeichnis);
 // -----------------Command: Put                            
                                 } else if (strcmp(tokens[2], "Put") == 0) {
                                     handlePutCommand(remoteaddr, addrlen, buf, BUFFER_SIZE, i, tokens[3], verzeichnis, remoteIP);

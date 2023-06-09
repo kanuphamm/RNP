@@ -18,15 +18,14 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
 {
     if(mode == SAVE_MODE)
     {
-        #define PRINT_LINE_FILE printf("Zeile: %d, Datei: %s\n", __LINE__, __FILE__)
         int nbytes;
         int run = 1;
         char endOfFile = 4;
-        //TODO hier wen buff nicht leer erst buff lehren
         char* eofPointer = strchr(buf, endOfFile);
         if (eofPointer != NULL) {
             run = 0;
             *eofPointer = '\0';
+            printf("%s", buf);
         }
         fprintf(stream, "%s", buf);
         while ( (run == 1) && (nbytes = recv(sockfd, buf, bufferSize -1, 0)) > 0  ) {
@@ -34,6 +33,10 @@ void my_recv(char* buf, size_t bufferSize, int sockfd, FILE *stream, int mode)
             if (eofPointer != NULL) {
                 run = 0;
                 *eofPointer = '\0';
+                fprintf(stream, "%s", buf);
+                fflush(stream);
+                
+                break;
             }
             fprintf(stream, "%s", buf);
             fflush(stream);
